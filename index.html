@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -265,6 +265,8 @@
     <div class="sidebar-section">Developers</div>
     <div class="nav-item" onclick="show('api')"><span class="nav-icon">🔌</span><span>API Reference</span></div>
     <div class="nav-item" onclick="show('webhooks')"><span class="nav-icon">🪝</span><span>Webhooks</span></div>
+    <div class="sidebar-section">Traffic</div>
+    <div class="nav-item" onclick="show('traffic')"><span class="nav-icon">🚦</span><span>Traffic Generator</span></div>
     <div class="sidebar-section">Admin</div>
     <div class="nav-item" onclick="show('users')"><span class="nav-icon">👥</span><span>Users</span></div>
     <div class="nav-item" onclick="show('settings')"><span class="nav-icon">⚙️</span><span>Settings</span></div>
@@ -463,33 +465,33 @@
           <div class="api-sidebar">
             <div class="api-group">
               <div class="api-group-title">Authentication</div>
-              <div class="api-ep active" onclick="showEndpoint('auth-key')"><span class="method get">GET</span>/v1/auth/status</div>
-              <div class="api-ep" onclick="showEndpoint('auth-rotate')"><span class="method post">POST</span>/v1/auth/rotate</div>
+              <div class="api-ep active" onclick="showEndpoint('auth-key',this)"><span class="method get">GET</span>/v1/auth/status</div>
+              <div class="api-ep" onclick="showEndpoint('auth-rotate',this)"><span class="method post">POST</span>/v1/auth/rotate</div>
             </div>
             <div class="api-group">
               <div class="api-group-title">Transactions</div>
-              <div class="api-ep" onclick="showEndpoint('tx-list')"><span class="method get">GET</span>/v1/transactions</div>
-              <div class="api-ep" onclick="showEndpoint('tx-create')"><span class="method post">POST</span>/v1/transactions</div>
-              <div class="api-ep" onclick="showEndpoint('tx-get')"><span class="method get">GET</span>/v1/transactions/:id</div>
-              <div class="api-ep" onclick="showEndpoint('tx-refund')"><span class="method post">POST</span>/v1/transactions/:id/refund</div>
+              <div class="api-ep" onclick="showEndpoint('tx-list',this)"><span class="method get">GET</span>/v1/transactions</div>
+              <div class="api-ep" onclick="showEndpoint('tx-create',this)"><span class="method post">POST</span>/v1/transactions</div>
+              <div class="api-ep" onclick="showEndpoint('tx-get',this)"><span class="method get">GET</span>/v1/transactions/:id</div>
+              <div class="api-ep" onclick="showEndpoint('tx-refund',this)"><span class="method post">POST</span>/v1/transactions/:id/refund</div>
             </div>
             <div class="api-group">
               <div class="api-group-title">Payouts</div>
-              <div class="api-ep" onclick="showEndpoint('payout-list')"><span class="method get">GET</span>/v1/payouts</div>
-              <div class="api-ep" onclick="showEndpoint('payout-create')"><span class="method post">POST</span>/v1/payouts</div>
-              <div class="api-ep" onclick="showEndpoint('payout-cancel')"><span class="method del">DEL</span>/v1/payouts/:id</div>
+              <div class="api-ep" onclick="showEndpoint('payout-list',this)"><span class="method get">GET</span>/v1/payouts</div>
+              <div class="api-ep" onclick="showEndpoint('payout-create',this)"><span class="method post">POST</span>/v1/payouts</div>
+              <div class="api-ep" onclick="showEndpoint('payout-cancel',this)"><span class="method del">DEL</span>/v1/payouts/:id</div>
             </div>
             <div class="api-group">
               <div class="api-group-title">Customers</div>
-              <div class="api-ep" onclick="showEndpoint('cust-list')"><span class="method get">GET</span>/v1/customers</div>
-              <div class="api-ep" onclick="showEndpoint('cust-create')"><span class="method post">POST</span>/v1/customers</div>
-              <div class="api-ep" onclick="showEndpoint('cust-update')"><span class="method patch">PATCH</span>/v1/customers/:id</div>
-              <div class="api-ep" onclick="showEndpoint('cust-delete')"><span class="method del">DEL</span>/v1/customers/:id</div>
+              <div class="api-ep" onclick="showEndpoint('cust-list',this)"><span class="method get">GET</span>/v1/customers</div>
+              <div class="api-ep" onclick="showEndpoint('cust-create',this)"><span class="method post">POST</span>/v1/customers</div>
+              <div class="api-ep" onclick="showEndpoint('cust-update',this)"><span class="method patch">PATCH</span>/v1/customers/:id</div>
+              <div class="api-ep" onclick="showEndpoint('cust-delete',this)"><span class="method del">DEL</span>/v1/customers/:id</div>
             </div>
             <div class="api-group">
               <div class="api-group-title">Webhooks</div>
-              <div class="api-ep" onclick="showEndpoint('wh-list')"><span class="method get">GET</span>/v1/webhooks</div>
-              <div class="api-ep" onclick="showEndpoint('wh-create')"><span class="method post">POST</span>/v1/webhooks</div>
+              <div class="api-ep" onclick="showEndpoint('wh-list',this)"><span class="method get">GET</span>/v1/webhooks</div>
+              <div class="api-ep" onclick="showEndpoint('wh-create',this)"><span class="method post">POST</span>/v1/webhooks</div>
             </div>
           </div>
           <div class="api-detail" id="api-detail-panel">
@@ -582,9 +584,12 @@
         </div>
       </div>
 
+      <!-- ─── TRAFFIC GENERATOR ─── -->
+      <div class="panel" id="p-traffic">
+        <!-- rendered by renderTraffic() -->
+      </div>
+
     </div>
-  </div>
-</div>
 
 <!-- MODAL -->
 <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
@@ -899,15 +904,22 @@ const ENDPOINTS={
   if(!ENDPOINTS[k])ENDPOINTS[k]={method:'GET',path:`/v1/${k.replace(/-/g,'/')}`,title:k,desc:'See full API docs for details.',params:[],response:`{ "object": "response", "status": "ok" }`};
 });
 
-function showEndpoint(id){
+const BASE_URL='https://demoshop.f5latam.app';
+
+function showEndpoint(id,el){
   document.querySelectorAll('.api-ep').forEach(e=>e.classList.remove('active'));
-  event.currentTarget.classList.add('active');
+  if(el)el.classList.add('active');
+  else document.querySelector(`[onclick*="'${id}'"]`)?.classList.add('active');
   const ep=ENDPOINTS[id];
   if(!ep)return;
-  const mColor={GET:'var(--green)',POST:'var(--accent)',DELETE:'var(--red)',PATCH:'var(--amber)'}[ep.method]||'var(--text2)';
   document.getElementById('api-detail-panel').innerHTML=`
     <div class="api-ep-title">${ep.title}</div>
     <div class="api-ep-path"><span class="method ${ep.method.toLowerCase()}" style="font-size:12px">${ep.method}</span><span>${ep.path}</span></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;padding:8px 12px;background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.2);border-radius:8px">
+      <span style="font-size:11px;color:var(--text3)">Base URL:</span>
+      <span style="font-family:var(--mono);font-size:12px;color:var(--accent)">${BASE_URL}</span>
+      <span class="badge badge-green" style="font-size:10px;margin-left:auto">LIVE</span>
+    </div>
     <div class="section-label">Description</div>
     <p style="font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.7">${ep.desc}</p>
     ${ep.params.length?`
@@ -921,26 +933,198 @@ function showEndpoint(id){
       </tr>`).join('')}</tbody>
     </table>`:''}
     <div class="section-label">Example Request</div>
-    <div class="code-block"><pre><span class="p">curl</span> -X <span class="s">${ep.method}</span> <span class="n">https://api.novapay.io${ep.path}</span> \\
+    <div class="code-block"><pre><span class="p">curl</span> -X <span class="s">${ep.method}</span> <span class="n">${BASE_URL}${ep.path}</span> \\
   -H <span class="s">"Authorization: Bearer sk_live_4xK9mN2qR7..."</span> \\
   -H <span class="s">"Content-Type: application/json"</span></pre></div>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-      <div class="section-label" style="margin:0">Response</div>
-      <button class="try-btn" onclick="tryEndpoint(this)">▶ Try it</button>
+      <div class="section-label" style="margin:0">Live Response</div>
+      <button class="try-btn" id="try-btn-main" onclick="tryEndpoint(this,'${id}')">▶ Try it — ${BASE_URL}</button>
     </div>
     <div class="code-block"><pre>${ep.response}</pre></div>
     <div class="response-box" id="live-response"></div>
   `;
 }
-function tryEndpoint(btn){
-  btn.textContent='Loading…';
-  setTimeout(()=>{
-    btn.textContent='▶ Try it';
-    const box=document.getElementById('live-response');
-    box.style.display='block';
-    const ep=Object.values(ENDPOINTS).find(e=>document.querySelector('.api-ep.active')?.textContent.includes(e.path.split('/').pop()))||Object.values(ENDPOINTS)[0];
-    box.innerHTML=`<span style="color:var(--green);font-weight:700">HTTP 200 OK</span>  <span style="color:var(--text3);font-size:11px">142ms</span>\n\n${ep.response}`;
-  },800);
+
+async function tryEndpoint(btn,epId){
+  const ep=ENDPOINTS[epId]||Object.values(ENDPOINTS)[0];
+  btn.textContent='⏳ Calling '+BASE_URL+'…';
+  btn.disabled=true;
+  const box=document.getElementById('live-response');
+  box.style.display='block';
+  box.innerHTML=`<span style="color:var(--amber)">→ ${ep.method} ${BASE_URL}${ep.path}</span>\n<span style="color:var(--text3)">Connecting…</span>`;
+  const t0=performance.now();
+  try{
+    const opts={method:ep.method==='GET'?'GET':'POST',headers:{'Content-Type':'application/json','X-NovaPay-Demo':'true'}};
+    if(ep.method!=='GET'&&ep.method!=='DELETE'){
+      opts.body=JSON.stringify({demo:true,source:'novapay-dashboard',timestamp:new Date().toISOString()});
+    }
+    const res=await fetch(BASE_URL+ep.path,opts).catch(()=>null);
+    const ms=Math.round(performance.now()-t0);
+    if(res){
+      let body='';
+      try{const txt=await res.text();body=txt.substring(0,1200);}catch(e){body='(no body)';}
+      box.innerHTML=`<span style="color:var(--green);font-weight:700">HTTP ${res.status} ${res.statusText||'OK'}</span>  <span style="color:var(--text3);font-size:11px">${ms}ms · ${BASE_URL}${ep.path}</span>\n\n${escHtml(body)}`;
+    } else {
+      box.innerHTML=`<span style="color:var(--amber);font-weight:700">CORS / Network</span>  <span style="color:var(--text3);font-size:11px">${ms}ms</span>\n\n<span style="color:var(--text2)">Request sent to <span style="color:var(--accent)">${BASE_URL}${ep.path}</span>.\nThe server responded but browser CORS policy blocked reading the body.\nThe HTTP request WAS made — check server logs at demoshop.f5latam.app.</span>\n\n<span style="color:var(--text3)">// Simulated response preview:</span>\n${ep.response}`;
+    }
+  }catch(err){
+    const ms=Math.round(performance.now()-t0);
+    box.innerHTML=`<span style="color:var(--red);font-weight:700">Error</span>  <span style="color:var(--text3);font-size:11px">${ms}ms</span>\n\n${escHtml(String(err))}\n\n<span style="color:var(--text3)">// Simulated response:</span>\n${ep.response}`;
+  }
+  btn.textContent='▶ Try it — '+BASE_URL;
+  btn.disabled=false;
+}
+
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ── TRAFFIC GENERATOR ─────────────────────────────
+const TG_SCENARIOS=[
+  {id:'browse',icon:'🛍️',label:'Browse Products',desc:'Simula usuarios navegando el catálogo de productos',color:'#4f8ef7',paths:['/'],method:'GET',count:10,delay:400},
+  {id:'search',icon:'🔍',label:'Product Search',desc:'Tráfico de búsquedas de productos con distintos términos',color:'#a78bfa',paths:['/search?q=laptop','/search?q=phone','/search?q=headphones','/search?q=tablet'],method:'GET',count:8,delay:500},
+  {id:'checkout',icon:'💳',label:'Checkout Flow',desc:'Flujo completo: carrito → checkout → confirmación',color:'#22c97c',paths:['/cart','/checkout','/checkout/confirm'],method:'GET',count:5,delay:700},
+  {id:'api_tx',icon:'⚡',label:'API: POST Transactions',desc:'Envía transacciones de pago al endpoint de la API',color:'#f0a930',paths:['/v1/transactions'],method:'POST',count:6,delay:600},
+  {id:'api_cust',icon:'👤',label:'API: Create Customers',desc:'Crea registros de clientes via API',color:'#2dd4bf',paths:['/v1/customers'],method:'POST',count:4,delay:800},
+  {id:'flood',icon:'🚀',label:'High Volume Burst',desc:'Ráfaga de alto volumen — 30 requests simultáneos',color:'#f25c5c',paths:['/','/products','/api/health','/search?q=sale','/v1/transactions'],method:'GET',count:30,delay:100},
+  {id:'health',icon:'🩺',label:'Health Check Loop',desc:'Monitoreo continuo del estado del servidor',color:'#22c97c',paths:['/api/health','/health','/status'],method:'GET',count:15,delay:300},
+  {id:'mixed',icon:'🎲',label:'Mixed Traffic',desc:'Mezcla realista de todos los tipos de tráfico',color:'#4f8ef7',paths:['/','/products','/search?q=deals','/cart','/v1/transactions','/v1/customers','/api/health'],method:'MIXED',count:20,delay:350},
+];
+let tgLogs=[];
+let tgRunning=false;
+let tgAbort=false;
+
+function renderTraffic(){
+  const panel=document.getElementById('p-traffic');
+  if(!panel)return;
+  panel.innerHTML=`
+  <div class="metrics" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+    <div class="metric-card"><div class="metric-label">Target</div><div class="metric-val" style="font-size:14px;font-family:var(--mono)">${BASE_URL}</div><div class="metric-delta" style="color:var(--text3)">demoshop.f5latam.app</div></div>
+    <div class="metric-card"><div class="metric-label">Requests Sent</div><div class="metric-val" id="tg-total">0</div><div class="metric-delta delta-up" id="tg-ok">0 success</div></div>
+    <div class="metric-card"><div class="metric-label">Errors</div><div class="metric-val" id="tg-err">0</div><div class="metric-delta delta-down" id="tg-errpct">0%</div></div>
+    <div class="metric-card"><div class="metric-label">Avg Latency</div><div class="metric-val" id="tg-lat">—</div><div class="metric-delta" style="color:var(--text3)" id="tg-rps">0 req/s</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px" id="tg-scenarios"></div>
+  <div style="display:flex;gap:10px;margin-bottom:16px">
+    <button class="tbtn tbtn-primary" id="tg-stop-btn" onclick="stopTraffic()" style="display:none;background:var(--red)">⏹ Stop</button>
+    <button class="tbtn tbtn-ghost" onclick="clearLogs()">🗑 Clear Logs</button>
+    <span id="tg-status" style="font-size:12px;color:var(--text3);align-self:center"></span>
+  </div>
+  <div class="table-wrap" style="max-height:340px;overflow-y:auto">
+    <div class="table-header-row" style="padding:10px 16px">
+      <div class="card-title" style="font-size:12px">Live Request Log</div>
+      <div id="tg-live-indicator" style="display:none;align-items:center;gap:6px;font-size:11px;color:var(--green)">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 1s infinite"></span> LIVE
+      </div>
+    </div>
+    <div id="tg-log" style="font-family:var(--mono);font-size:11px;padding:0"></div>
+  </div>
+  <style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}</style>`;
+  // render scenario cards
+  document.getElementById('tg-scenarios').innerHTML=TG_SCENARIOS.map(s=>`
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor='${s.color}44'" onmouseout="this.style.borderColor='var(--border)'" onclick="runScenario('${s.id}')">
+      <div style="font-size:20px;margin-bottom:6px">${s.icon}</div>
+      <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px">${s.label}</div>
+      <div style="font-size:10px;color:var(--text3);line-height:1.5;margin-bottom:10px">${s.desc}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:10px;font-family:var(--mono);color:${s.color}">${s.count} req</span>
+        <button class="tbtn tbtn-primary" style="font-size:10px;padding:4px 10px;background:${s.color}" onclick="event.stopPropagation();runScenario('${s.id}')">▶ Run</button>
+      </div>
+    </div>`).join('');
+}
+
+let tgStats={total:0,ok:0,err:0,latencies:[],start:null};
+
+function updateStats(){
+  document.getElementById('tg-total').textContent=tgStats.total;
+  document.getElementById('tg-ok').textContent=tgStats.ok+' success';
+  document.getElementById('tg-err').textContent=tgStats.err;
+  document.getElementById('tg-errpct').textContent=tgStats.total?Math.round(tgStats.err/tgStats.total*100)+'%':'0%';
+  if(tgStats.latencies.length){
+    const avg=Math.round(tgStats.latencies.reduce((a,b)=>a+b,0)/tgStats.latencies.length);
+    document.getElementById('tg-lat').textContent=avg+'ms';
+  }
+  if(tgStats.start){
+    const elapsed=(Date.now()-tgStats.start)/1000;
+    document.getElementById('tg-rps').textContent=(tgStats.total/Math.max(elapsed,0.1)).toFixed(1)+' req/s';
+  }
+}
+
+function addLog(entry){
+  tgLogs.unshift(entry);
+  if(tgLogs.length>200)tgLogs.pop();
+  const log=document.getElementById('tg-log');
+  if(!log)return;
+  const color=entry.status>=200&&entry.status<400?'var(--green)':entry.status===0?'var(--amber)':'var(--red)';
+  const row=document.createElement('div');
+  row.style.cssText='display:flex;align-items:center;gap:10px;padding:7px 16px;border-bottom:1px solid var(--border);animation:fadeIn .2s';
+  row.innerHTML=`<span style="color:${color};min-width:32px;font-weight:700">${entry.status||'ERR'}</span><span style="color:var(--text3);min-width:50px">${entry.ms}ms</span><span style="color:var(--amber);min-width:44px">${entry.method}</span><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${BASE_URL}${entry.path}</span><span style="color:var(--text3);font-size:10px">${new Date().toLocaleTimeString()}</span>`;
+  log.insertBefore(row,log.firstChild);
+  if(log.children.length>100)log.removeChild(log.lastChild);
+}
+
+async function fireRequest(path,method){
+  const t0=performance.now();
+  try{
+    const m=(method==='MIXED')?(['GET','GET','GET','POST'][Math.floor(Math.random()*4)]):method;
+    const opts={method:m,headers:{'Content-Type':'application/json','X-Traffic-Source':'novapay-traffic-gen','X-Demo':'true'}};
+    if(m==='POST')opts.body=JSON.stringify({demo:true,ts:Date.now(),source:'traffic-generator'});
+    const res=await fetch(BASE_URL+path,opts).catch(()=>({status:0}));
+    const ms=Math.round(performance.now()-t0);
+    const status=res.status||0;
+    tgStats.total++;
+    if(status>=200&&status<400)tgStats.ok++;
+    else tgStats.err++;
+    tgStats.latencies.push(ms);
+    if(tgStats.latencies.length>100)tgStats.latencies.shift();
+    addLog({status,ms,method:m,path});
+    updateStats();
+  }catch(e){
+    const ms=Math.round(performance.now()-t0);
+    tgStats.total++;tgStats.err++;
+    addLog({status:0,ms,method,path});
+    updateStats();
+  }
+}
+
+async function runScenario(id){
+  if(tgRunning){alert('Un escenario ya está corriendo. Detén el actual primero.');return;}
+  const s=TG_SCENARIOS.find(x=>x.id===id);
+  if(!s)return;
+  tgRunning=true;tgAbort=false;
+  if(!tgStats.start)tgStats.start=Date.now();
+  const stopBtn=document.getElementById('tg-stop-btn');
+  const statusEl=document.getElementById('tg-status');
+  const liveEl=document.getElementById('tg-live-indicator');
+  if(stopBtn)stopBtn.style.display='inline-block';
+  if(liveEl)liveEl.style.display='flex';
+  if(statusEl)statusEl.textContent=`▶ Running: ${s.label} (${s.count} requests)…`;
+  for(let i=0;i<s.count;i++){
+    if(tgAbort)break;
+    const path=s.paths[i%s.paths.length];
+    await fireRequest(path,s.method);
+    await new Promise(r=>setTimeout(r,s.delay+Math.random()*200));
+  }
+  tgRunning=false;
+  if(stopBtn)stopBtn.style.display='none';
+  if(liveEl)liveEl.style.display='none';
+  if(statusEl)statusEl.textContent=`✅ ${s.label} completado — ${s.count} requests enviados a ${BASE_URL}`;
+}
+
+function stopTraffic(){
+  tgAbort=true;tgRunning=false;
+  const stopBtn=document.getElementById('tg-stop-btn');
+  const liveEl=document.getElementById('tg-live-indicator');
+  if(stopBtn)stopBtn.style.display='none';
+  if(liveEl)liveEl.style.display='none';
+  const statusEl=document.getElementById('tg-status');
+  if(statusEl)statusEl.textContent='⏹ Detenido por el usuario.';
+}
+
+function clearLogs(){
+  tgLogs=[];
+  tgStats={total:0,ok:0,err:0,latencies:[],start:null};
+  const log=document.getElementById('tg-log');
+  if(log)log.innerHTML='';
+  updateStats();
 }
 
 // ── NAVIGATION ────────────────────────────────────
@@ -949,8 +1133,9 @@ const TITLES={dashboard:['Dashboard','Welcome back, Sara. Here\'s what\'s happen
   analytics:['Analytics','Volume, revenue, and fraud metrics.'],
   payouts:['Payouts','Manage disbursements to your bank accounts.'],
   disputes:['Disputes','Track and respond to chargebacks.'],
-  api:['API Reference','Explore and test the NovaPay API.'],
+  api:['API Reference','Explore and test the NovaPay API — real calls to demoshop.f5latam.app'],
   webhooks:['Webhooks','Manage event subscriptions.'],
+  traffic:['Traffic Generator','Genera tráfico programado hacia demoshop.f5latam.app'],
   users:['Team','Users and permissions.'],
   settings:['Settings','Account and integration settings.'],
   notifications:['Notifications','Activity and alerts.']};
@@ -963,7 +1148,8 @@ function show(id){
   const t=TITLES[id]||[id,''];
   document.getElementById('page-title').textContent=t[0];
   document.getElementById('page-sub').textContent=t[1];
-  if(id==='api'){setTimeout(()=>showEndpoint('tx-create'),10);}
+  if(id==='api'){setTimeout(()=>{const el=document.querySelector('#p-api .api-ep');showEndpoint('tx-create',el);},10);}
+  if(id==='traffic'){renderTraffic();}
 }
 
 // ── SETTINGS TABS ─────────────────────────────────
@@ -1050,7 +1236,11 @@ renderHourly();
 renderCountries();
 renderMerchants();
 renderWebhooks();
-showEndpoint('tx-create');
+// init API panel with first endpoint
+(function(){
+  const el=document.querySelector('.api-ep');
+  if(el)showEndpoint('tx-create',el);
+})();
 </script>
 </body>
 </html>
