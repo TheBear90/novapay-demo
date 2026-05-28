@@ -268,7 +268,7 @@
     <div class="sidebar-section">Traffic</div>
     <div class="nav-item" onclick="show('traffic')"><span class="nav-icon">🚦</span><span>Traffic Generator</span></div>
     <div class="sidebar-section">Security</div>
-    <div class="nav-item" onclick="show('zap')"><span class="nav-icon">🛡️</span><span>ZAP Security Test</span></div>
+    <div class="nav-item" onclick="show('zap')"><span class="nav-icon">🛡️</span><span>Security Testing</span></div>
     <div class="sidebar-section">Admin</div>
     <div class="nav-item" onclick="show('users')"><span class="nav-icon">👥</span><span>Users</span></div>
     <div class="nav-item" onclick="show('settings')"><span class="nav-icon">⚙️</span><span>Settings</span></div>
@@ -1158,14 +1158,600 @@ function clearLogs(){
 }
 
 
-// ── OWASP ZAP INTEGRATION ─────────────────────────
-// ZAP exposes a local REST API at http://localhost:8080
-// All calls are to ZAP's own daemon — not to the target directly.
-// ZAP proxies and analyzes the traffic to demoshop.f5latam.app.
+// ═══════════════════════════════════════════════════
+// SECURITY TESTING — Pentest-Tools.com Cloud API
+// 100% web, no install, runs on Vercel
+// API docs: https://pentest-tools.com/docs/api/v2
+// ═══════════════════════════════════════════════════
 
-const ZAP_API   = 'http://localhost:8080';
-const ZAP_KEY   = 'demo-api-key';          // matches ZAP -config api.key=
-const SCAN_TARGET = BASE_URL;
+const PT_BASE    = 'https://app.pentest-tools.com/api/v2';
+const SCAN_TARGET = BASE_URL; // https://demoshop.f5latam.app
+
+// Tool IDs in Pentest-Tools.com
+const PT_TOOLS = {
+  website_scanner : { id: 170, name: 'Website Vulnerability Scanner', icon: '🌐', desc: 'OWASP Top 10, misconfigs, headers' },
+  network_scanner : { id: 110, name: 'Network Vulnerability Scanner',  icon: '🔌', desc: 'Open ports, CVEs, services'       },
+  subdomain_finder: { id: 120, name: 'Subdomain Finder',               icon: '🗺️', desc: 'Subdomain enumeration & takeover'  },
+  url_fuzzer      : { id: 180, name: 'URL Fuzzer / Dir Scanner',       icon: '📂', desc: 'Hidden paths, backup files, dirs'  },
+  ssl_scanner     : { id: 290, name: 'SSL/TLS Scanner',                icon: '🔒', desc: 'Cert issues, weak ciphers, HSTS'   },
+};
+
+// Severity → WAAP action mapping (F5 Distributed Cloud style)
+const SEV_MAP = {
+  critical : { color:'#f25c5c', bg:'rgba(242,92,92,.12)',  waap:'Block & Alert',   badge:'badge-red'   },
+  high     : { color:'#f25c5c', bg:'rgba(242,92,92,.09)',  waap:'Block',           badge:'badge-red'   },
+  medium   : { color:'#f0a930', bg:'rgba(240,169,48,.12)', waap:'Alert & Log',     badge:'badge-amber' },
+  low      : { color:'#4f8ef7', bg:'rgba(79,142,247,.12)', waap:'Log',             badge:'badge-blue'  },
+  info     : { color:'#9aa0b4', bg:'rgba(154,160,180,.08)',waap:'Monitor',         badge:'badge-purple'},
+};
+
+// State
+let ptState = {
+  apiKey: '', token: '',
+  targetId: null, workspaceId: null,
+  scans: {},       // { toolId: { id, status, progress, findings } }
+  allFindings: [],
+  phase: 'idle',   // idle | auth | scanning | done | error
+  errorMsg: '',
+  pollTimers: {},
+  stats: { critical:0, high:0, medium:0, low:0, info:0, scanned:0 },
+};
+let ptLogs = [];
+
+// ── API helpers ───────────────────────────────────
+async function ptFetch(path, opts={}){
+  const headers = { 'Content-Type':'application/json', Accept:'application/json' };
+  if(ptState.token) headers['Authorization'] = 'Bearer '+ptState.token;
+  else if(ptState.apiKey) headers['Authorization'] = 'Bearer '+ptState.apiKey;
+  const res = await fetch(PT_BASE+path, { ...opts, headers: {...headers,...(opts.headers||{})} });
+  const ct = res.headers.get('content-type')||'';
+  const data = ct.includes('json') ? await res.json() : await res.text();
+  if(!res.ok) throw new Error((data&&data.message)||`HTTP ${res.status}`);
+  return data;
+}
+
+// ── Auth: exchange API key for JWT token ──────────
+async function ptAuth(apiKey){
+  const data = await ptFetch('/auth/api-token', {
+    method:'POST',
+    headers:{'Authorization':''},  // override — no bearer yet
+    body: JSON.stringify({ api_key: apiKey })
+  });
+  // Response: { api_token: "..." }
+  return data.api_token || data.token || data.access_token || apiKey;
+}
+
+// ── Workspace / Target management ─────────────────
+async function ptGetWorkspace(){
+  const data = await ptFetch('/workspaces');
+  const ws = Array.isArray(data) ? data[0] : (data.data?.[0]);
+  if(!ws) throw new Error('No workspaces found in your account');
+  return ws.id;
+}
+async function ptCreateTarget(url, wsId){
+  const data = await ptFetch('/targets', {
+    method:'POST',
+    body: JSON.stringify({ name: url, target: url, workspace_id: wsId })
+  });
+  const t = data.data || data;
+  return t.id;
+}
+async function ptGetTargets(wsId){
+  const data = await ptFetch('/targets?workspace_id='+wsId);
+  return Array.isArray(data) ? data : (data.data||[]);
+}
+
+// ── Scan lifecycle ────────────────────────────────
+async function ptStartScan(toolId, targetId, wsId, mode='light'){
+  const body = {
+    tool_id      : toolId,
+    target_id    : targetId,
+    workspace_id : wsId,
+    scan_type    : mode === 'deep' ? 1 : 0,  // 0=light, 1=deep
+  };
+  const data = await ptFetch('/scans', { method:'POST', body: JSON.stringify(body) });
+  const scan = data.data || data;
+  return scan.id;
+}
+async function ptGetScan(scanId){
+  const data = await ptFetch('/scans/'+scanId);
+  return data.data || data;
+}
+async function ptGetFindings(scanId){
+  const data = await ptFetch('/scans/'+scanId+'/output?page=1&per_page=100');
+  // findings array may be nested
+  return (data.data || data.output || data.findings || data || []);
+}
+async function ptStopScan(scanId){
+  await ptFetch('/scans/'+scanId+'/stop', { method:'POST' }).catch(()=>{});
+}
+
+// ── Orchestration: full scan flow ─────────────────
+async function startPtScan(){
+  const keyEl = document.getElementById('pt-api-key');
+  const modeEl= document.getElementById('pt-scan-mode');
+  const apiKey = keyEl?.value.trim();
+  if(!apiKey){ ptShowError('Ingresa tu API Key de Pentest-Tools.com'); return; }
+
+  const mode = modeEl?.value || 'light';
+  const selectedTools = [...document.querySelectorAll('.pt-tool-check:checked')].map(e=>e.value);
+  if(!selectedTools.length){ ptShowError('Selecciona al menos una herramienta'); return; }
+
+  ptState = { ...ptState, apiKey, token:'', targetId:null, workspaceId:null,
+    scans:{}, allFindings:[], phase:'auth', errorMsg:'',
+    stats:{critical:0,high:0,medium:0,low:0,info:0,scanned:0} };
+  ptLogs = [];
+  ptUpdateUI();
+
+  try{
+    // 1. Authenticate
+    ptAddLog('info', 'Autenticando con Pentest-Tools.com…');
+    ptState.token = await ptAuth(apiKey);
+    ptAddLog('success', 'Autenticado correctamente');
+
+    // 2. Get workspace
+    ptAddLog('info', 'Obteniendo workspace…');
+    ptState.workspaceId = await ptGetWorkspace();
+    ptAddLog('info', `Workspace ID: ${ptState.workspaceId}`);
+
+    // 3. Create or reuse target
+    ptAddLog('info', `Registrando target: ${SCAN_TARGET}`);
+    try{
+      const existing = await ptGetTargets(ptState.workspaceId);
+      const found = existing.find(t=>t.target===SCAN_TARGET||t.name===SCAN_TARGET);
+      if(found){ ptState.targetId=found.id; ptAddLog('info',`Target existente reutilizado: ID ${found.id}`); }
+      else { ptState.targetId = await ptCreateTarget(SCAN_TARGET, ptState.workspaceId); ptAddLog('success',`Target creado: ID ${ptState.targetId}`); }
+    }catch(e){ ptState.targetId = await ptCreateTarget(SCAN_TARGET, ptState.workspaceId); }
+
+    // 4. Launch each selected tool
+    ptState.phase = 'scanning';
+    ptState.stats.scanned = selectedTools.length;
+    ptUpdateUI();
+
+    for(const toolKey of selectedTools){
+      const tool = PT_TOOLS[toolKey];
+      if(!tool) continue;
+      ptAddLog('info', `Lanzando ${tool.name}…`);
+      try{
+        const scanId = await ptStartScan(tool.id, ptState.targetId, ptState.workspaceId, mode);
+        ptState.scans[toolKey] = { id:scanId, toolKey, toolName:tool.name, icon:tool.icon,
+          status:'running', progress:0, findings:[] };
+        ptAddLog('success', `${tool.icon} ${tool.name} → Scan ID: ${scanId}`);
+        ptUpdateScanCard(toolKey);
+        pollScan(toolKey);
+      }catch(e){
+        ptAddLog('error', `${tool.name} falló: ${e.message}`);
+        ptState.scans[toolKey] = { id:null, toolKey, toolName:tool.name, icon:tool.icon,
+          status:'error', progress:0, findings:[], error:e.message };
+        ptUpdateScanCard(toolKey);
+      }
+    }
+
+  }catch(e){
+    ptState.phase='error'; ptState.errorMsg=e.message;
+    ptAddLog('error', 'Error: '+e.message);
+    ptUpdateUI();
+  }
+}
+
+function pollScan(toolKey){
+  if(ptState.pollTimers[toolKey]) clearInterval(ptState.pollTimers[toolKey]);
+  ptState.pollTimers[toolKey] = setInterval(async()=>{
+    const sc = ptState.scans[toolKey];
+    if(!sc||!sc.id){ clearInterval(ptState.pollTimers[toolKey]); return; }
+    try{
+      const info = await ptGetScan(sc.id);
+      sc.status   = info.status_name || info.status || sc.status;
+      sc.progress = info.progress || 0;
+      // summary stats
+      if(info.result_summary){
+        const rs = info.result_summary;
+        sc.summary = rs;
+      }
+      ptUpdateScanCard(toolKey);
+      ptAddLog('info', `${sc.icon} ${sc.toolName}: ${sc.progress}% (${sc.status})`);
+
+      if(sc.status==='finished'||sc.status==='done'||sc.status==='completed'||sc.progress>=100){
+        clearInterval(ptState.pollTimers[toolKey]);
+        sc.status='done'; sc.progress=100;
+        ptAddLog('success', `${sc.icon} ${sc.toolName} completado`);
+        await fetchScanFindings(toolKey);
+        checkAllDone();
+      }
+    }catch(e){
+      ptAddLog('error', `Poll error ${sc.toolName}: ${e.message}`);
+    }
+  }, 4000);
+}
+
+async function fetchScanFindings(toolKey){
+  const sc = ptState.scans[toolKey];
+  if(!sc?.id) return;
+  try{
+    const raw = await ptGetFindings(sc.id);
+    sc.findings = Array.isArray(raw) ? raw : [];
+    sc.findings.forEach(f=>{
+      ptState.allFindings.push({...f, toolKey, toolName:sc.toolName, toolIcon:sc.icon});
+      const sev=(f.severity||f.risk||'info').toLowerCase();
+      if(ptState.stats[sev]!==undefined) ptState.stats[sev]++;
+    });
+    ptAddLog('success', `${sc.icon} ${sc.findings.length} findings recuperados de ${sc.toolName}`);
+    renderPtFindings();
+    ptUpdateUI();
+  }catch(e){ ptAddLog('error', `Findings error ${sc.toolName}: ${e.message}`); }
+}
+
+function checkAllDone(){
+  const all = Object.values(ptState.scans);
+  if(all.length && all.every(s=>s.status==='done'||s.status==='error')){
+    ptState.phase='done';
+    ptAddLog('success', `✅ Todos los escaneos completados · ${ptState.allFindings.length} findings totales`);
+    ptUpdateUI();
+  }
+}
+
+async function stopAllScans(){
+  ptAddLog('warn','Deteniendo escaneos…');
+  for(const [key,sc] of Object.entries(ptState.scans)){
+    if(sc.id && sc.status==='running'){
+      await ptStopScan(sc.id);
+      sc.status='stopped';
+      ptUpdateScanCard(key);
+    }
+    if(ptState.pollTimers[key]) clearInterval(ptState.pollTimers[key]);
+  }
+  ptState.phase='idle';
+  ptAddLog('warn','Escaneos detenidos por el usuario');
+  ptUpdateUI();
+}
+
+function resetPt(){
+  Object.values(ptState.pollTimers||{}).forEach(t=>clearInterval(t));
+  ptState={apiKey:'',token:'',targetId:null,workspaceId:null,scans:{},allFindings:[],
+    phase:'idle',errorMsg:'',pollTimers:{},stats:{critical:0,high:0,medium:0,low:0,info:0,scanned:0}};
+  ptLogs=[];
+  renderZap();
+}
+
+function ptShowError(msg){ alert('⚠️ '+msg); }
+
+// ── Logging ───────────────────────────────────────
+function ptAddLog(type,msg){
+  ptLogs.unshift({type,msg,time:new Date().toLocaleTimeString()});
+  if(ptLogs.length>150) ptLogs.pop();
+  const el=document.getElementById('pt-log');
+  if(!el)return;
+  const c={info:'var(--text2)',warn:'var(--amber)',error:'var(--red)',success:'var(--green)'}[type]||'var(--text2)';
+  const icons={info:'ℹ️',warn:'⚠️',error:'❌',success:'✅'};
+  const row=document.createElement('div');
+  row.style.cssText='padding:5px 14px;border-bottom:1px solid var(--border);font-size:11px;display:flex;gap:8px;font-family:var(--mono)';
+  row.innerHTML=`<span>${icons[type]||'•'}</span><span style="color:var(--text3);flex-shrink:0">${new Date().toLocaleTimeString()}</span><span style="color:${c};flex:1;word-break:break-all">${escHtml(msg)}</span>`;
+  el.insertBefore(row,el.firstChild);
+}
+
+// ── UI updaters ───────────────────────────────────
+const PHASE_BADGES={
+  idle     :{t:'Inactivo',   c:'badge-amber'},
+  auth     :{t:'Autenticando…',c:'badge-blue'},
+  scanning :{t:'Escaneando', c:'badge-red'},
+  done     :{t:'Completado', c:'badge-green'},
+  error    :{t:'Error',      c:'badge-red'},
+};
+
+function ptUpdateUI(){
+  const pm=PHASE_BADGES[ptState.phase]||PHASE_BADGES.idle;
+  const pb=document.getElementById('pt-phase-badge');
+  if(pb)pb.innerHTML=`<span class="badge ${pm.c}">${pm.t}</span>`;
+  const scanning=ptState.phase==='auth'||ptState.phase==='scanning';
+  const startBtn=document.getElementById('pt-start-btn');
+  const stopBtn=document.getElementById('pt-stop-btn');
+  const resetBtn=document.getElementById('pt-reset-btn');
+  if(startBtn)startBtn.style.display=scanning?'none':'inline-block';
+  if(stopBtn) stopBtn.style.display=scanning?'inline-block':'none';
+  if(resetBtn)resetBtn.style.display=ptState.phase==='done'||ptState.phase==='error'?'inline-block':'none';
+  // stats
+  ['critical','high','medium','low','info'].forEach(k=>{
+    const el=document.getElementById('pt-stat-'+k);
+    if(el)el.textContent=ptState.stats[k]||0;
+  });
+  const errEl=document.getElementById('pt-error-wrap');
+  if(errEl){ errEl.style.display=ptState.phase==='error'?'flex':'none';
+    const eb=document.getElementById('pt-error-body'); if(eb)eb.textContent=ptState.errorMsg; }
+}
+
+function ptUpdateScanCard(toolKey){
+  const sc=ptState.scans[toolKey];
+  if(!sc)return;
+  const card=document.getElementById('pt-card-'+toolKey);
+  if(!card)return;
+  const pct=sc.progress||0;
+  const statusColor={running:'var(--accent)',done:'var(--green)',error:'var(--red)',stopped:'var(--amber)'}[sc.status]||'var(--text3)';
+  const rs=sc.summary||{};
+  card.innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="font-size:18px">${sc.icon}</span>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:600">${sc.toolName}</div>
+        <div style="font-size:10px;color:${statusColor};margin-top:1px">${sc.status}${sc.id?' · ID '+sc.id:''}</div>
+      </div>
+      ${sc.status==='running'?`<span style="font-size:11px;color:var(--accent)">${pct}%</span>`:''}
+    </div>
+    <div style="background:var(--bg3);border-radius:3px;height:4px;margin-bottom:10px">
+      <div style="width:${pct}%;height:100%;background:${statusColor};border-radius:3px;transition:width .4s"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;text-align:center">
+      ${['critical','high','medium','low','info'].map(s=>`
+        <div style="background:${SEV_MAP[s].bg};border-radius:5px;padding:4px 2px">
+          <div style="font-size:12px;font-weight:700;color:${SEV_MAP[s].color}">${rs[s]||sc.findings?.filter(f=>(f.severity||'info').toLowerCase()===s).length||0}</div>
+          <div style="font-size:9px;color:var(--text3)">${s}</div>
+        </div>`).join('')}
+    </div>
+    ${sc.error?`<div style="margin-top:8px;font-size:11px;color:var(--red)">${escHtml(sc.error)}</div>`:''}`;
+}
+
+function renderPtFindings(){
+  const tbody=document.getElementById('pt-findings-body');
+  if(!tbody)return;
+  if(!ptState.allFindings.length){
+    tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--text3)">
+      ${ptState.phase==='done'?'No se encontraron vulnerabilidades en este escaneo.':'Los hallazgos aparecerán aquí mientras se ejecutan los escaneos.'}</td></tr>`;
+    return;
+  }
+  const sevOrder={critical:0,high:1,medium:2,low:3,info:4};
+  const sorted=[...ptState.allFindings].sort((a,b)=>{
+    const sa=(a.severity||a.risk||'info').toLowerCase();
+    const sb=(b.severity||b.risk||'info').toLowerCase();
+    return(sevOrder[sa]??4)-(sevOrder[sb]??4);
+  });
+  tbody.innerHTML=sorted.map((f,i)=>{
+    const sev=(f.severity||f.risk||'info').toLowerCase();
+    const sm=SEV_MAP[sev]||SEV_MAP.info;
+    const name=f.name||f.title||f.check||'Finding';
+    const url=(f.url||f.target||SCAN_TARGET).replace(/^https?:\/\/[^/]+/,'').substring(0,36)||'/';
+    const cvss=f.cvss_score||f.cvss||'—';
+    const cve=f.cve_id||f.cve||'—';
+    const cwe=f.cwe_id||f.cwe||'—';
+    return`<tr style="cursor:pointer" onclick="ptShowFinding(${i})">
+      <td><span class="badge" style="background:${sm.bg};color:${sm.color}">${sev}</span></td>
+      <td style="font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(name)}">${escHtml(name)}</td>
+      <td style="font-size:11px">${f.toolIcon||''} ${escHtml(f.toolName||'')}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:${sm.color}">${cvss}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text3)">${escHtml(String(cve).substring(0,20))}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text2);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(url)}</td>
+      <td><span class="badge badge-purple" style="font-size:9px">${sm.waap}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function ptShowFinding(i){
+  const f=ptState.allFindings[i];
+  if(!f)return;
+  const sev=(f.severity||f.risk||'info').toLowerCase();
+  const sm=SEV_MAP[sev]||SEV_MAP.info;
+  const box=document.getElementById('modal-box');
+  const fields=[
+    ['Severidad', `<span class="badge" style="background:${sm.bg};color:${sm.color}">${sev}</span>`],
+    ['Herramienta', (f.toolIcon||'')+' '+(f.toolName||'')],
+    ['URL', f.url||SCAN_TARGET],
+    ['CVSS Score', f.cvss_score||f.cvss||'—'],
+    ['CVE', f.cve_id||f.cve||'—'],
+    ['CWE', f.cwe_id||f.cwe||'—'],
+    ['Descripción', (f.description||f.details||'No disponible').substring(0,400)],
+    ['Solución', (f.solution||f.remediation||f.fix||'Consulta la documentación del vendor').substring(0,400)],
+    ['Acción WAAP', sm.waap+' — F5 Distributed Cloud signature'],
+  ];
+  box.innerHTML=`
+    <div class="modal-title">${escHtml(f.name||f.title||'Security Finding')}</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
+      <span class="badge" style="background:${sm.bg};color:${sm.color}">${sev}</span>
+      <span class="badge badge-purple">${sm.waap}</span>
+      ${f.cve_id?`<span class="badge badge-blue">${escHtml(f.cve_id)}</span>`:''}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow-y:auto">
+      ${fields.map(([k,v])=>`<div style="font-size:12px;padding:6px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text3);font-weight:600;display:block;margin-bottom:2px">${k}</span>
+        <span style="color:var(--text2);word-break:break-all">${v}</span></div>`).join('')}
+    </div>
+    <div class="modal-footer">
+      <button class="tbtn tbtn-ghost" onclick="closeModal()">Cerrar</button>
+      <button class="tbtn tbtn-primary" onclick="alert('Regla WAF creada en F5 Distributed Cloud (demo)')">Crear Regla WAF</button>
+      <button class="tbtn" style="background:var(--amber);color:#fff;border:none" onclick="alert('Exportado a Jira (demo)')">→ Jira</button>
+    </div>`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function ptTab(el,id){
+  el.closest('#pt-tabs').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  ['pt-tab-scans','pt-tab-findings','pt-tab-log','pt-tab-api'].forEach(s=>{
+    const e=document.getElementById(s); if(e)e.style.display=s===id?'block':'none';
+  });
+}
+
+// ── Main render ───────────────────────────────────
+function renderZap(){
+  const panel=document.getElementById('p-zap');
+  if(!panel)return;
+  panel.innerHTML=`
+
+  <!-- SETUP CARD -->
+  <div class="card" style="margin-bottom:16px">
+    <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:220px">
+        <label style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">
+          API Key — Pentest-Tools.com
+        </label>
+        <input id="pt-api-key" class="input-field" type="password" placeholder="tu-api-key-de-pentest-tools.com"
+          style="width:100%;background:var(--bg3)" value="${ptState.apiKey}">
+        <div style="font-size:10px;color:var(--text3);margin-top:4px">
+          Obtén tu key en <a href="https://app.pentest-tools.com/account/api" target="_blank" style="color:var(--accent)">app.pentest-tools.com → My Account → API</a>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">Target</label>
+        <div style="font-family:var(--mono);font-size:13px;color:var(--accent);padding:7px 0">${SCAN_TARGET}</div>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">Modo</label>
+        <select id="pt-scan-mode" class="input-field" style="cursor:pointer">
+          <option value="light">Light (rápido ~2 min)</option>
+          <option value="deep">Deep (completo ~15 min)</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div id="pt-phase-badge"><span class="badge badge-amber">Inactivo</span></div>
+        <button id="pt-start-btn" class="tbtn tbtn-primary" onclick="startPtScan()">▶ Iniciar Escaneo</button>
+        <button id="pt-stop-btn"  class="tbtn" style="background:var(--red);color:#fff;display:none;border:none" onclick="stopAllScans()">⏹ Detener</button>
+        <button id="pt-reset-btn" class="tbtn tbtn-ghost" style="display:none" onclick="resetPt()">↺ Reset</button>
+      </div>
+    </div>
+
+    <!-- Tool selector -->
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Herramientas a ejecutar</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">
+        ${Object.entries(PT_TOOLS).map(([k,t])=>`
+          <label style="display:flex;flex-direction:column;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;transition:border-color .15s"
+            onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="display:flex;align-items:center;gap:6px">
+              <input type="checkbox" class="pt-tool-check" value="${k}" checked style="accent-color:var(--accent)">
+              <span style="font-size:15px">${t.icon}</span>
+            </div>
+            <div style="font-size:11px;font-weight:600;line-height:1.3">${t.name}</div>
+            <div style="font-size:10px;color:var(--text3)">${t.desc}</div>
+          </label>`).join('')}
+      </div>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div id="pt-error-wrap" class="alert alert-warn" style="display:none;margin-bottom:14px">
+    <div class="alert-icon">⚠️</div><div class="alert-body" id="pt-error-body"></div>
+  </div>
+
+  <!-- SEVERITY STATS -->
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px">
+    ${['critical','high','medium','low','info'].map(s=>`
+      <div class="metric-card" style="border-color:${SEV_MAP[s].color}44">
+        <div class="metric-label">${s.charAt(0).toUpperCase()+s.slice(1)}</div>
+        <div class="metric-val" id="pt-stat-${s}" style="color:${SEV_MAP[s].color}">0</div>
+        <div class="metric-delta" style="color:var(--text3)">WAF: ${SEV_MAP[s].waap}</div>
+      </div>`).join('')}
+  </div>
+
+  <!-- TABS -->
+  <div class="tab-bar" id="pt-tabs">
+    <div class="tab active" onclick="ptTab(this,'pt-tab-scans')">🔬 Escaneos activos</div>
+    <div class="tab" onclick="ptTab(this,'pt-tab-findings')">🛡️ Findings WAAP</div>
+    <div class="tab" onclick="ptTab(this,'pt-tab-log')">📋 Activity Log</div>
+    <div class="tab" onclick="ptTab(this,'pt-tab-api')">💻 API Reference</div>
+  </div>
+
+  <!-- TAB: SCANS -->
+  <div id="pt-tab-scans">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px" id="pt-scan-cards">
+      ${Object.keys(PT_TOOLS).map(k=>`
+        <div id="pt-card-${k}" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-size:18px">${PT_TOOLS[k].icon}</span>
+            <div>
+              <div style="font-size:12px;font-weight:600">${PT_TOOLS[k].name}</div>
+              <div style="font-size:10px;color:var(--text3)">En espera</div>
+            </div>
+          </div>
+          <div style="background:var(--bg3);border-radius:3px;height:4px">
+            <div style="width:0%;height:100%;background:var(--border2);border-radius:3px"></div>
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>
+
+  <!-- TAB: FINDINGS -->
+  <div id="pt-tab-findings" style="display:none">
+    <div class="table-wrap">
+      <div class="table-header-row">
+        <div><div class="card-title">Findings de seguridad</div>
+          <div class="card-sub">Clasificados por severidad · Click para detalle · Acción WAAP recomendada</div></div>
+        <button class="tbtn tbtn-ghost" onclick="exportFindings()">⬇ Exportar JSON</button>
+      </div>
+      <table>
+        <thead><tr>
+          <th>Severidad</th><th>Vulnerabilidad</th><th>Herramienta</th>
+          <th>CVSS</th><th>CVE</th><th>URL</th><th>WAAP Action</th>
+        </tr></thead>
+        <tbody id="pt-findings-body">
+          <tr><td colspan="7" style="text-align:center;padding:28px;color:var(--text3)">
+            Inicia un escaneo para ver los hallazgos aquí</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB: LOG -->
+  <div id="pt-tab-log" style="display:none">
+    <div class="table-wrap" style="max-height:420px;overflow-y:auto">
+      <div class="table-header-row" style="padding:10px 14px">
+        <div class="card-title" style="font-size:12px">Activity Log</div>
+        <div id="pt-live-dot" style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--green)">
+          <span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 1s infinite"></span> LIVE
+        </div>
+      </div>
+      <div id="pt-log" style="font-family:var(--mono)"></div>
+    </div>
+  </div>
+
+  <!-- TAB: API REFERENCE -->
+  <div id="pt-tab-api" style="display:none">
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title">Pentest-Tools.com REST API</div>
+          <div class="card-sub">Base URL: <span style="font-family:var(--mono);color:var(--accent)">https://app.pentest-tools.com/api/v2</span></div>
+        </div>
+      </div>
+      ${[
+        ['POST /auth/api-token','Autenticación — obtener JWT token',
+          'curl -X POST https://app.pentest-tools.com/api/v2/auth/api-token \\\n  -H "Content-Type: application/json" \\\n  -d \'{"api_key":"TU_API_KEY"}\''],
+        ['GET /workspaces','Listar workspaces disponibles',
+          'curl https://app.pentest-tools.com/api/v2/workspaces \\\n  -H "Authorization: Bearer TU_TOKEN"'],
+        ['POST /targets','Crear un nuevo target',
+          'curl -X POST https://app.pentest-tools.com/api/v2/targets \\\n  -H "Authorization: Bearer TU_TOKEN" \\\n  -d \'{"name":"demoshop.f5latam.app","target":"https://demoshop.f5latam.app","workspace_id":WS_ID}\''],
+        ['POST /scans','Lanzar un escaneo',
+          'curl -X POST https://app.pentest-tools.com/api/v2/scans \\\n  -H "Authorization: Bearer TU_TOKEN" \\\n  -d \'{"tool_id":170,"target_id":TARGET_ID,"workspace_id":WS_ID,"scan_type":0}\''],
+        ['GET /scans/{id}','Ver estado y progreso del escaneo',
+          'curl https://app.pentest-tools.com/api/v2/scans/SCAN_ID \\\n  -H "Authorization: Bearer TU_TOKEN"'],
+        ['GET /scans/{id}/output','Obtener findings del escaneo',
+          'curl https://app.pentest-tools.com/api/v2/scans/SCAN_ID/output \\\n  -H "Authorization: Bearer TU_TOKEN"'],
+        ['POST /scans/{id}/stop','Detener un escaneo en curso',
+          'curl -X POST https://app.pentest-tools.com/api/v2/scans/SCAN_ID/stop \\\n  -H "Authorization: Bearer TU_TOKEN"'],
+      ].map(([ep,desc,cmd])=>`
+        <div style="margin-bottom:16px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+            <span class="method ${ep.startsWith('POST')?'post':ep.startsWith('GET')?'get':'del'}" style="font-size:10px">${ep.split(' ')[0]}</span>
+            <span style="font-family:var(--mono);font-size:12px;color:var(--text)">${ep.split(' ')[1]}</span>
+            <span style="font-size:11px;color:var(--text3)">${desc}</span>
+          </div>
+          <div class="code-block" style="margin:0;padding:10px 14px;display:flex;align-items:flex-start;gap:10px">
+            <pre style="flex:1;overflow-x:auto;font-size:11px;line-height:1.6">${escHtml(cmd)}</pre>
+            <button class="filter-btn" style="flex-shrink:0;margin-top:2px"
+              onclick="navigator.clipboard.writeText(${JSON.stringify(cmd)}).then(()=>{this.textContent='✓';setTimeout(()=>this.textContent='Copy',1200)})">Copy</button>
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>
+
+  <style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}</style>`;
+}
+
+function exportFindings(){
+  if(!ptState.allFindings.length){alert('No hay findings para exportar');return;}
+  const blob=new Blob([JSON.stringify(ptState.allFindings,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`security-findings-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+// ── NAVIGATION ────────────────────────────────────
 
 // Risk levels as OWASP ZAP defines them
 const ZAP_RISK = {
