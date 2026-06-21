@@ -267,8 +267,11 @@
     <div class="nav-item" onclick="show('webhooks')"><span class="nav-icon">🪝</span><span>Webhooks</span></div>
     <div class="sidebar-section">Traffic</div>
     <div class="nav-item" onclick="show('traffic')"><span class="nav-icon">🚦</span><span>Traffic Generator</span></div>
-    <div class="sidebar-section">Security</div>
-    <div class="nav-item" onclick="show('zap')"><span class="nav-icon">🛡️</span><span>Security Testing</span></div>
+    <div class="nav-item" onclick="show('attacks')"><span class="nav-icon">🛡️</span><span>WAF Attack Lab</span></div>
+    <div class="sidebar-section">Usuarios & Perfiles</div>
+    <div class="nav-item" onclick="show('profiles')"><span class="nav-icon">👤</span><span>Perfiles</span></div>
+    <div class="nav-item" onclick="show('register')"><span class="nav-icon">📝</span><span>Registro</span></div>
+    <div class="nav-item" onclick="show('activity')"><span class="nav-icon">📡</span><span>Actividad WAAP</span></div>
     <div class="sidebar-section">Admin</div>
     <div class="nav-item" onclick="show('users')"><span class="nav-icon">👥</span><span>Users</span></div>
     <div class="nav-item" onclick="show('settings')"><span class="nav-icon">⚙️</span><span>Settings</span></div>
@@ -591,10 +594,17 @@
         <!-- rendered by renderTraffic() -->
       </div>
 
-      <!-- ─── ZAP SECURITY TESTING ─── -->
-      <div class="panel" id="p-zap">
-        <!-- rendered by renderZap() -->
+      <!-- ─── WAF ATTACK LAB ─── -->
+      <div class="panel" id="p-attacks">
+        <!-- rendered by renderAttacks() -->
       </div>
+
+      <!-- ─── PROFILES ─── -->
+      <div class="panel" id="p-profiles"><!-- rendered by renderProfiles() --></div>
+      <!-- ─── REGISTER ─── -->
+      <div class="panel" id="p-register"><!-- rendered by renderRegister() --></div>
+      <!-- ─── WAAP ACTIVITY ─── -->
+      <div class="panel" id="p-activity"><!-- rendered by renderActivity() --></div>
 
     </div>
 
@@ -2253,6 +2263,314 @@ function zapTab(el,id){
     const e=document.getElementById(s); if(e)e.style.display=s===id?'block':'none';
   });
 }
+
+// ═══════════════════════════════════════════════════
+// LOCAL PRODUCTIVE DEMO STATE — USERS, TXS, ACTIVITY
+// Runs entirely in the browser via localStorage. No install, no backend required.
+// ═══════════════════════════════════════════════════
+const LS_USERS='novapay.demo.localUsers.v2';
+const LS_TXS='novapay.demo.localTxs.v2';
+const LS_ACTIVITY='novapay.demo.activity.v2';
+
+const DEMO_NAMES=[
+  ['Martina Ríos','martina.rios@demo.local','AR'],['Federico Sosa','federico.sosa@demo.local','UY'],
+  ['Camila Pereira','camila.pereira@demo.local','PY'],['Lucas Benítez','lucas.benitez@demo.local','AR'],
+  ['Valentina Costa','valentina.costa@demo.local','CL'],['Bruno Méndez','bruno.mendez@demo.local','MX'],
+  ['Sofía Álvarez','sofia.alvarez@demo.local','AR'],['Nicolás Vera','nicolas.vera@demo.local','UY']
+];
+const DEMO_MERCHANTS=['DemoShop Electronics','NovaPay Market','F5 Demo Store','Secure Checkout LATAM','Cloud Native Shop','WAAP Retail'];
+const DEMO_ACTIONS=[
+  {type:'login',icon:'🔐',title:'User login',desc:'Inicio de sesión exitoso desde navegador demo'},
+  {type:'profile',icon:'✏️',title:'Profile update',desc:'Actualización de dirección y preferencias'},
+  {type:'checkout',icon:'🛒',title:'Checkout started',desc:'Carrito convertido a intento de pago'},
+  {type:'payment',icon:'💳',title:'Payment authorized',desc:'Pago autorizado por el emisor'},
+  {type:'refund',icon:'↩️',title:'Refund simulated',desc:'Reembolso parcial generado en sandbox'},
+];
+function readJson(key, fallback){try{return JSON.parse(localStorage.getItem(key)||'')||fallback;}catch(e){return fallback;}}
+function writeJson(key,val){localStorage.setItem(key,JSON.stringify(val));}
+function demoId(prefix){return prefix+'_'+Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4);}
+function initials(name){return name.split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase();}
+function nowStr(){return new Date().toLocaleString();}
+function seedDemoState(){
+  if(!localStorage.getItem(LS_USERS)){
+    const users=DEMO_NAMES.slice(0,5).map((n,i)=>({id:demoId('usr'),name:n[0],email:n[1],country:n[2],role:i===0?'Admin':'Customer',status:'active',risk:[8,14,22,37,5][i],balance:Math.round(200+Math.random()*6000),created:nowStr(),txs:Math.floor(2+Math.random()*12)}));
+    writeJson(LS_USERS,users);
+  }
+  if(!localStorage.getItem(LS_TXS)){
+    const users=readJson(LS_USERS,[]);
+    const txs=[];
+    users.forEach(u=>{for(let i=0;i<Math.min(3,u.txs||1);i++)txs.push(makeLocalTx(u));});
+    writeJson(LS_TXS,txs.slice(0,18));
+  }
+  if(!localStorage.getItem(LS_ACTIVITY)){
+    writeJson(LS_ACTIVITY,[{time:nowStr(),type:'system',severity:'info',title:'Demo state initialized',desc:'Usuarios, transacciones y actividad local preparados para la demo.',source:'NovaPay'}]);
+  }
+}
+function getUsers(){seedDemoState();return readJson(LS_USERS,[]);}
+function saveUsers(u){writeJson(LS_USERS,u);}
+function getLocalTxs(){seedDemoState();return readJson(LS_TXS,[]);}
+function saveLocalTxs(t){writeJson(LS_TXS,t.slice(0,80));}
+function getActivity(){seedDemoState();return readJson(LS_ACTIVITY,[]);}
+function addActivity(type,title,desc,severity='info',source='NovaPay'){
+  const a=getActivity();
+  a.unshift({time:nowStr(),type,severity,title,desc,source});
+  writeJson(LS_ACTIVITY,a.slice(0,160));
+  const active=document.getElementById('p-activity')?.classList.contains('active');
+  if(active)renderActivity();
+}
+function makeLocalTx(user){
+  const amount=Math.round(1500+Math.random()*240000);
+  const merchant=DEMO_MERCHANTS[Math.floor(Math.random()*DEMO_MERCHANTS.length)];
+  const risk=Math.min(99,Math.round((user?.risk||10)+Math.random()*35));
+  const status=risk>70?'flagged':risk>45?'pending':'completed';
+  return {id:demoId('txn'),userId:user?.id||'usr_demo',customer:user?.name||'Demo User',email:user?.email||'demo@local',merchant,amount,currency:'USD',method:['card','bank','wire'][Math.floor(Math.random()*3)],status,risk,date:nowStr()};
+}
+function generateLocalUser(){
+  const users=getUsers();
+  const tuple=DEMO_NAMES[Math.floor(Math.random()*DEMO_NAMES.length)];
+  const suffix=Math.floor(100+Math.random()*899);
+  const user={id:demoId('usr'),name:tuple[0]+' '+suffix,email:tuple[1].replace('@','+'+suffix+'@'),country:tuple[2],role:'Customer',status:'active',risk:Math.round(3+Math.random()*42),balance:Math.round(500+Math.random()*9000),created:nowStr(),txs:0};
+  users.unshift(user);saveUsers(users);
+  addActivity('user','Local user generated',`${user.name} creado para la demo productiva.`, 'low','Local Demo');
+  renderProfiles();
+}
+function createTxForUser(userId){
+  const users=getUsers(); const u=users.find(x=>x.id===userId)||users[0]; if(!u)return;
+  const tx=makeLocalTx(u); const txs=getLocalTxs(); txs.unshift(tx); saveLocalTxs(txs);
+  u.txs=(u.txs||0)+1; u.balance=Math.max(0,(u.balance||0)-Math.round(tx.amount/100)); saveUsers(users);
+  addActivity('transaction','Transaction generated',`${tx.id} · ${tx.customer} · ${fmt(tx.amount)} · riesgo ${tx.risk}`, tx.risk>70?'high':tx.risk>45?'medium':'low','NovaPay API');
+  renderProfiles();
+}
+function modifyUserRisk(userId){
+  const users=getUsers(); const u=users.find(x=>x.id===userId); if(!u)return;
+  const before=u.risk; u.risk=Math.min(99,Math.round(u.risk+10+Math.random()*25)); if(u.risk>75)u.status='review'; saveUsers(users);
+  addActivity('profile','Risk profile modified',`${u.name}: riesgo ${before} → ${u.risk}. Simula cambio de perfil transaccional.`, u.risk>75?'high':'medium','Risk Engine');
+  renderProfiles();
+}
+function clearDemoData(){
+  localStorage.removeItem(LS_USERS);localStorage.removeItem(LS_TXS);localStorage.removeItem(LS_ACTIVITY);seedDemoState();renderProfiles();renderActivity();
+}
+function renderProfiles(){
+  const users=getUsers(); const txs=getLocalTxs();
+  const totalVol=txs.reduce((a,b)=>a+b.amount,0); const high=users.filter(u=>u.risk>70).length;
+  const panel=document.getElementById('p-profiles'); if(!panel)return;
+  panel.innerHTML=`
+    <div class="metrics" style="grid-template-columns:repeat(4,1fr)">
+      <div class="metric-card"><div class="metric-label">Local Users</div><div class="metric-val">${users.length}</div><div class="metric-delta delta-up">browser localStorage</div></div>
+      <div class="metric-card"><div class="metric-label">Demo Transactions</div><div class="metric-val">${txs.length}</div><div class="metric-delta" style="color:var(--text3)">no backend impact</div></div>
+      <div class="metric-card"><div class="metric-label">Local Volume</div><div class="metric-val">${fmt(totalVol)}</div><div class="metric-delta delta-up">simulated productive flow</div></div>
+      <div class="metric-card"><div class="metric-label">High Risk Profiles</div><div class="metric-val" style="color:${high?'var(--red)':'var(--green)'}">${high}</div><div class="metric-delta" style="color:var(--text3)">risk engine demo</div></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:14px">
+      <button class="tbtn tbtn-primary" onclick="generateLocalUser()">+ Generate Local User</button>
+      <button class="tbtn tbtn-ghost" onclick="clearDemoData()">Reset Demo Data</button>
+    </div>
+    <div class="users-grid" style="margin-bottom:20px">
+      ${users.map(u=>`<div class="user-card">
+        <div class="user-card-top">
+          <div class="user-avatar" style="background:${u.risk>70?'var(--red)':u.risk>45?'var(--amber)':'var(--accent)'}">${initials(u.name)}</div>
+          <div><div class="user-card-name">${escHtml(u.name)}</div><div class="user-card-email">${escHtml(u.email)}</div>
+            <div style="margin-top:4px">${statusBadge(u.status)} <span class="badge badge-blue" style="font-size:10px">${u.country}</span></div></div>
+        </div>
+        <div class="user-stat-row">
+          <div class="user-stat"><div class="user-stat-val">${u.risk}</div><div class="user-stat-lbl">Risk Score</div></div>
+          <div class="user-stat"><div class="user-stat-val">${fmt(u.balance||0)}</div><div class="user-stat-lbl">Balance</div></div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:12px">
+          <button class="filter-btn" onclick="createTxForUser('${u.id}')">+ Tx</button>
+          <button class="filter-btn" onclick="modifyUserRisk('${u.id}')">Modify Risk</button>
+        </div>
+      </div>`).join('')}
+    </div>
+    <div class="table-wrap">
+      <div class="table-header-row"><div><div class="card-title">Local Transaction Stream</div><div class="card-sub">Eventos simulados de una app productiva para acompañar demos WAAP/API</div></div></div>
+      <table><thead><tr><th>ID</th><th>Customer</th><th>Merchant</th><th>Amount</th><th>Status</th><th>Risk</th><th>Date</th></tr></thead>
+      <tbody>${txs.slice(0,18).map(t=>`<tr><td style="font-family:var(--mono);font-size:11px;color:var(--text3)">${t.id}</td><td>${escHtml(t.customer)}</td><td>${escHtml(t.merchant)}</td><td class="amount-pos">${fmt(t.amount)}</td><td>${statusBadge(t.status)}</td><td>${riskBadge(t.risk)}</td><td style="font-size:11px;color:var(--text3)">${t.date}</td></tr>`).join('')}</tbody></table>
+    </div>`;
+}
+function renderRegister(){
+  const panel=document.getElementById('p-register'); if(!panel)return;
+  panel.innerHTML=`
+    <div class="chart-grid">
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">Local Customer Registration</div><div class="card-sub">Crea usuarios únicamente en el navegador para simular onboarding productivo.</div></div></div>
+        <div class="modal-field"><label class="modal-label">Full name</label><input id="reg-name" class="modal-input" value="Demo Customer ${Math.floor(1000+Math.random()*8999)}"></div>
+        <div class="modal-field"><label class="modal-label">Email</label><input id="reg-email" class="modal-input" value="demo.customer${Math.floor(1000+Math.random()*8999)}@demoshop.local"></div>
+        <div class="modal-field"><label class="modal-label">Country</label><select id="reg-country" class="modal-input"><option>AR</option><option>UY</option><option>PY</option><option>CL</option><option>MX</option></select></div>
+        <div class="modal-field"><label class="modal-label">Initial risk score</label><input id="reg-risk" class="modal-input" type="number" min="0" max="99" value="12"></div>
+        <div class="modal-footer" style="justify-content:flex-start"><button class="tbtn tbtn-primary" onclick="createUserFromRegister()">Create Local User</button><button class="tbtn tbtn-ghost" onclick="renderRegister()">Randomize</button></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">Demo Behavior Automation</div><div class="card-sub">Genera actividad local para que el dashboard parezca productivo durante la demo.</div></div></div>
+        ${DEMO_ACTIONS.map(a=>`<div class="setting-row"><div><div class="setting-name">${a.icon} ${a.title}</div><div class="setting-desc">${a.desc}</div></div><button class="filter-btn" onclick="simulateDemoAction('${a.type}')">Run</button></div>`).join('')}
+      </div>
+    </div>`;
+}
+function createUserFromRegister(){
+  const name=document.getElementById('reg-name')?.value.trim();
+  const email=document.getElementById('reg-email')?.value.trim();
+  const country=document.getElementById('reg-country')?.value||'AR';
+  const risk=Math.max(0,Math.min(99,parseInt(document.getElementById('reg-risk')?.value||'0',10)));
+  if(!name||!email){alert('Nombre y email son requeridos para crear un usuario demo.');return;}
+  const users=getUsers(); const user={id:demoId('usr'),name,email,country,role:'Customer',status:'active',risk,balance:Math.round(500+Math.random()*5000),created:nowStr(),txs:0};
+  users.unshift(user); saveUsers(users); addActivity('user','User registered',`${user.name} creado localmente desde el formulario.`,risk>70?'high':risk>45?'medium':'low','Registration UI');
+  renderRegister();
+}
+function simulateDemoAction(type){
+  const users=getUsers(); const u=users[Math.floor(Math.random()*users.length)]; const action=DEMO_ACTIONS.find(x=>x.type===type)||DEMO_ACTIONS[0];
+  if(type==='payment'||type==='checkout'||type==='refund')createTxForUser(u.id);
+  else addActivity(type,action.title,`${action.desc} · Usuario: ${u.name}`,type==='login'?'low':'info','Productive Demo');
+}
+function renderActivity(){
+  const panel=document.getElementById('p-activity'); if(!panel)return;
+  const items=getActivity();
+  const counts={high:items.filter(x=>x.severity==='high').length,medium:items.filter(x=>x.severity==='medium').length,low:items.filter(x=>x.severity==='low').length,info:items.filter(x=>x.severity==='info').length};
+  panel.innerHTML=`
+    <div class="metrics" style="grid-template-columns:repeat(4,1fr)">
+      <div class="metric-card"><div class="metric-label">High</div><div class="metric-val" style="color:var(--red)">${counts.high}</div><div class="metric-delta">WAAP / Risk events</div></div>
+      <div class="metric-card"><div class="metric-label">Medium</div><div class="metric-val" style="color:var(--amber)">${counts.medium}</div><div class="metric-delta">review</div></div>
+      <div class="metric-card"><div class="metric-label">Low</div><div class="metric-val" style="color:var(--accent)">${counts.low}</div><div class="metric-delta">monitored</div></div>
+      <div class="metric-card"><div class="metric-label">Info</div><div class="metric-val">${counts.info}</div><div class="metric-delta">audit trail</div></div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-header-row"><div><div class="card-title">WAAP / Application Activity</div><div class="card-sub">Auditoría local de transacciones, cambios de perfiles y pruebas de WAF.</div></div><button class="tbtn tbtn-ghost" onclick="writeJson(LS_ACTIVITY,[]);renderActivity()">Clear</button></div>
+      <div class="activity-feed">${items.length?items.map(a=>{const b=a.severity==='high'?'badge-red':a.severity==='medium'?'badge-amber':a.severity==='low'?'badge-blue':'badge-purple';return `<div class="activity-item"><div class="act-icon" style="background:rgba(79,142,247,.12)">${a.type==='attack'?'🛡️':a.type==='transaction'?'💳':a.type==='user'?'👤':'📡'}</div><div style="flex:1"><div style="font-weight:600;font-size:12px">${escHtml(a.title)}</div><div style="font-size:11px;color:var(--text3)">${escHtml(a.desc)}</div></div><span class="badge ${b}" style="font-size:10px">${a.severity}</span><span style="font-size:10px;color:var(--text3);min-width:110px;text-align:right">${a.time}</span></div>`;}).join(''):`<div class="empty-state"><div class="empty-icon">📭</div>No hay eventos todavía</div>`}</div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// WAF ATTACK LAB — CONTROLLED MALICIOUS TRAFFIC GENERATOR
+// Sends bounded, non-destructive signatures to demoshop.f5latam.app for F5 XC WAAP demos.
+// ═══════════════════════════════════════════════════
+const ATTACK_TARGET=BASE_URL;
+const ATTACK_MAX_TOTAL=30;
+const ATTACK_MIN_DELAY=250;
+let attackState={running:false,abort:false,total:0,sent:0,blocked:0,errors:0,latencies:[],logs:[],started:null};
+const ATTACK_SCENARIOS=[
+  {id:'sqli',icon:'💉',label:'SQL Injection',severity:'high',expected:'WAF Signature: SQL Injection / Attack Type Injection',desc:'Payloads de prueba en query y JSON body contra endpoints demo.',requests:[
+    {method:'GET',path:'/api/waf-lab?scenario=sqli&search=%27%20OR%20%271%27%3D%271%27--&category=products',payload:"' OR '1'='1'--"},
+    {method:'GET',path:'/api/waf-lab?scenario=sqli&account=105%20UNION%20SELECT%20card_number%2Ccvv%20FROM%20cards',payload:'UNION SELECT demo'},
+    {method:'POST',path:'/api/waf-lab',body:{scenario:'sqli',username:"admin' OR '1'='1'--",password:'demo-only',operation:'login'}}]},
+  {id:'xss',icon:'🧬',label:'Cross-Site Scripting',severity:'high',expected:'WAF Signature: XSS / Script Tag / Event Handler',desc:'Pruebas reflejadas no persistentes en parámetros de búsqueda y comentarios.',requests:[
+    {method:'GET',path:'/api/waf-lab?scenario=xss&q=%3Cscript%3Ealert%28%27f5-demo%27%29%3C%2Fscript%3E',payload:'<script>alert()</script>'},
+    {method:'GET',path:'/api/waf-lab?scenario=xss&comment=%3Cimg%20src%3Dx%20onerror%3Dalert%281%29%3E',payload:'img onerror'},
+    {method:'POST',path:'/api/waf-lab',body:{scenario:'xss',review:'<svg/onload=alert("f5-demo")>',product:'demo'}}]},
+  {id:'traversal',icon:'📁',label:'Path Traversal / LFI',severity:'high',expected:'WAF Signature: Directory Traversal / File Access',desc:'Intentos controlados de lectura de archivos sobre un endpoint simulado.',requests:[
+    {method:'GET',path:'/api/waf-lab?scenario=traversal&file=..%2F..%2F..%2F..%2Fetc%2Fpasswd',payload:'../../../../etc/passwd'},
+    {method:'GET',path:'/api/waf-lab?scenario=traversal&template=..%255c..%255cwindows%255cwin.ini',payload:'encoded traversal'},
+    {method:'POST',path:'/api/waf-lab',body:{scenario:'traversal',download:'../../../../etc/shadow',safeDemo:true}}]},
+  {id:'cmdi',icon:'🖥️',label:'Command Injection',severity:'high',expected:'WAF Signature: OS Command Injection',desc:'Secuencias de shell enviadas como texto a un endpoint sin ejecución real.',requests:[
+    {method:'GET',path:'/api/waf-lab?scenario=cmdi&report=monthly%3Bcat%20%2Fetc%2Fpasswd',payload:';cat /etc/passwd'},
+    {method:'GET',path:'/api/waf-lab?scenario=cmdi&host=127.0.0.1%20%26%26%20id',payload:'&& id'},
+    {method:'POST',path:'/api/waf-lab',body:{scenario:'cmdi',export:'pdf; whoami',safeDemo:true}}]},
+  {id:'ssrf',icon:'🌐',label:'SSRF / Metadata Probe',severity:'medium',expected:'WAF Signature: SSRF / Metadata Service Access',desc:'URLs internas simuladas para validar detección de SSRF sin conexión saliente real.',requests:[
+    {method:'GET',path:'/api/waf-lab?scenario=ssrf&callback=http%3A%2F%2F169.254.169.254%2Flatest%2Fmeta-data%2F',payload:'metadata URL'},
+    {method:'GET',path:'/api/waf-lab?scenario=ssrf&url=http%3A%2F%2Flocalhost%3A8080%2Fadmin',payload:'localhost URL'},
+    {method:'POST',path:'/api/waf-lab',body:{scenario:'ssrf',webhook_url:'http://127.0.0.1:8000/internal',safeDemo:true}}]},
+  {id:'scanner',icon:'🕵️',label:'Recon / Sensitive Path',severity:'medium',expected:'WAAP/Bot: Scanner / Sensitive File Access',desc:'Accesos típicos de scanner hacia rutas sensibles, servidos por el dominio demo.',requests:[
+    {method:'GET',path:'/api/waf-lab?scenario=recon&path=%2F.env',payload:'/.env'},
+    {method:'GET',path:'/api/waf-lab?scenario=recon&path=%2F.git%2Fconfig',payload:'/.git/config'},
+    {method:'GET',path:'/api/waf-lab?scenario=recon&path=%2Fwp-login.php',payload:'/wp-login.php'}]},
+  {id:'api_abuse',icon:'🔌',label:'API Abuse / Schema Drift',severity:'medium',expected:'API Security: Schema Violation / Sensitive Field',desc:'JSON con campos inesperados para mostrar API Discovery y API Protection.',requests:[
+    {method:'POST',path:'/api/waf-lab',body:{scenario:'api_abuse',amount:-999999,role:'admin',debug:true,credit_card:'4111111111111111'}},
+    {method:'POST',path:'/api/waf-lab',body:{scenario:'api_abuse',operation:'mass_update',isAdmin:true,limit:999999}},
+    {method:'POST',path:'/api/waf-lab',body:{scenario:'api_abuse',customer:{email:'demo@f5.local',ssn:'000-00-0000'},metadata:{unexpected:'field'}}}]}
+];
+function attackBadge(sev){return sev==='high'?'badge-red':sev==='medium'?'badge-amber':'badge-blue';}
+function attackUrl(path){return ATTACK_TARGET+path;}
+function resetAttackState(){attackState={running:false,abort:false,total:0,sent:0,blocked:0,errors:0,latencies:[],logs:[],started:null};updateAttackStats();const log=document.getElementById('attack-log');if(log)log.innerHTML='';}
+function renderAttacks(){
+  const panel=document.getElementById('p-attacks'); if(!panel)return;
+  panel.innerHTML=`
+    <div class="alert alert-warn" style="margin-bottom:16px">
+      <div class="alert-icon">🛡️</div><div class="alert-body"><div class="alert-title">WAF Attack Lab controlado</div>
+      Este módulo envía firmas conocidas de ataque únicamente a <strong>${ATTACK_TARGET}</strong>. Está limitado a ${ATTACK_MAX_TOTAL} requests por ejecución, con delay mínimo de ${ATTACK_MIN_DELAY}ms, sin fuzzing infinito, sin payloads destructivos y sin targets editables.</div>
+    </div>
+    <div class="metrics" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px">
+      <div class="metric-card"><div class="metric-label">Locked Target</div><div class="metric-val" style="font-size:13px;font-family:var(--mono)">${ATTACK_TARGET}</div><div class="metric-delta" style="color:var(--text3)">same domain flow</div></div>
+      <div class="metric-card"><div class="metric-label">Sent</div><div class="metric-val" id="attack-sent">0</div><div class="metric-delta delta-up" id="attack-total">0 total</div></div>
+      <div class="metric-card"><div class="metric-label">Blocked / 403</div><div class="metric-val" id="attack-blocked">0</div><div class="metric-delta" style="color:var(--text3)">visible when WAAP blocks</div></div>
+      <div class="metric-card"><div class="metric-label">Avg Latency</div><div class="metric-val" id="attack-lat">—</div><div class="metric-delta" id="attack-rps" style="color:var(--text3)">0 req/s</div></div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div style="display:flex;align-items:end;gap:14px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);min-width:250px"><input id="attack-armed" type="checkbox" style="accent-color:var(--accent)"> Confirmo ejecución controlada contra demoshop.f5latam.app</label>
+        <div><label class="modal-label">Requests per scenario</label><input id="attack-count" class="input-field" type="number" min="1" max="10" value="3" style="width:90px"></div>
+        <div><label class="modal-label">Delay ms</label><input id="attack-delay" class="input-field" type="number" min="${ATTACK_MIN_DELAY}" max="5000" value="600" style="width:100px"></div>
+        <div style="margin-left:auto;display:flex;gap:8px"><button class="tbtn tbtn-primary" onclick="runSelectedAttacks()">▶ Run Selected</button><button id="attack-stop" class="tbtn" style="display:none;background:var(--red);color:#fff;border:none" onclick="stopAttacks()">⏹ Stop</button><button class="tbtn tbtn-ghost" onclick="resetAttackState()">Clear</button></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px" id="attack-scenarios">
+      ${ATTACK_SCENARIOS.map(s=>`<label style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;display:block">
+        <div style="display:flex;align-items:flex-start;gap:10px"><input class="attack-check" type="checkbox" value="${s.id}" checked style="accent-color:var(--accent);margin-top:4px"><div style="flex:1"><div style="font-size:18px;margin-bottom:4px">${s.icon}</div><div style="font-weight:600;font-size:13px">${s.label}</div><div style="font-size:11px;color:var(--text3);line-height:1.5;margin:6px 0 10px">${s.desc}</div><span class="badge ${attackBadge(s.severity)}" style="font-size:10px">${s.severity}</span> <span class="badge badge-purple" style="font-size:10px">${s.requests.length} probes</span></div></div>
+        <div style="font-size:10px;color:var(--text3);margin-top:10px;border-top:1px solid var(--border);padding-top:8px">Expected: ${s.expected}</div>
+        <button class="filter-btn" style="margin-top:10px" onclick="event.preventDefault();event.stopPropagation();runAttackScenario('${s.id}')">Run only this</button>
+      </label>`).join('')}
+    </div>
+    <div class="table-wrap" style="max-height:390px;overflow-y:auto">
+      <div class="table-header-row" style="padding:10px 16px"><div><div class="card-title" style="font-size:12px">Live Attack Request Log</div><div class="card-sub">La respuesta 403/406 indica bloqueo real de WAAP. Status 200/opaque indica request enviado o permitido.</div></div><div id="attack-live" style="display:none;align-items:center;gap:6px;font-size:11px;color:var(--red)"><span style="width:6px;height:6px;border-radius:50%;background:var(--red);display:inline-block;animation:pulse 1s infinite"></span> SENDING</div></div>
+      <div id="attack-log" style="font-family:var(--mono);font-size:11px"></div>
+    </div>`;
+  updateAttackStats();
+}
+function updateAttackStats(){
+  const sent=document.getElementById('attack-sent'); if(!sent)return;
+  sent.textContent=attackState.sent; document.getElementById('attack-total').textContent=attackState.total+' total'; document.getElementById('attack-blocked').textContent=attackState.blocked;
+  const avg=attackState.latencies.length?Math.round(attackState.latencies.reduce((a,b)=>a+b,0)/attackState.latencies.length)+'ms':'—'; document.getElementById('attack-lat').textContent=avg;
+  const elapsed=attackState.started?(Date.now()-attackState.started)/1000:0; document.getElementById('attack-rps').textContent=elapsed?(attackState.sent/Math.max(elapsed,.1)).toFixed(1)+' req/s':'0 req/s';
+}
+function addAttackLog(row){
+  attackState.logs.unshift(row); if(attackState.logs.length>160)attackState.logs.pop();
+  const log=document.getElementById('attack-log'); if(!log)return;
+  const c=row.blocked?'var(--red)':row.error?'var(--amber)':'var(--green)';
+  const badge=row.blocked?'BLOCKED':row.error?'ERROR':'SENT';
+  const div=document.createElement('div'); div.style.cssText='display:flex;align-items:center;gap:10px;padding:7px 16px;border-bottom:1px solid var(--border)';
+  div.innerHTML=`<span style="color:${c};font-weight:700;min-width:54px">${badge}</span><span style="color:var(--text3);min-width:48px">${row.status}</span><span style="color:var(--text3);min-width:56px">${row.ms}ms</span><span style="color:var(--amber);min-width:42px">${row.method}</span><span class="badge ${attackBadge(row.severity)}" style="font-size:9px;min-width:54px;justify-content:center">${row.category}</span><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(row.url)}">${escHtml(row.url)}</span><span style="font-size:10px;color:var(--text3)">${new Date().toLocaleTimeString()}</span>`;
+  log.insertBefore(div,log.firstChild); if(log.children.length>120)log.removeChild(log.lastChild);
+}
+async function sendAttackRequest(s,req){
+  const t0=performance.now(); const url=attackUrl(req.path);
+  const sameOrigin=new URL(ATTACK_TARGET).origin===window.location.origin;
+  const opts={method:req.method,cache:'no-store',credentials:'omit'};
+  if(req.body){
+    if(sameOrigin){opts.headers={'Content-Type':'application/json'};opts.body=JSON.stringify(req.body);} else {opts.mode='no-cors';opts.body=JSON.stringify(req.body);}
+  } else if(!sameOrigin){opts.mode='no-cors';}
+  try{
+    const res=await fetch(url,opts); const ms=Math.round(performance.now()-t0); const status=res.status||'opaque';
+    const blocked=[401,403,406,429].includes(res.status); attackState.total++; attackState.sent++; if(blocked)attackState.blocked++; attackState.latencies.push(ms); if(attackState.latencies.length>100)attackState.latencies.shift();
+    addAttackLog({status,ms,method:req.method,url,blocked,category:s.id,severity:s.severity}); updateAttackStats();
+    addActivity('attack',`${s.label} probe sent`,`${req.method} ${req.path} · expected ${s.expected}`,s.severity==='high'?'high':'medium','WAF Attack Lab');
+  }catch(e){
+    const ms=Math.round(performance.now()-t0); attackState.total++; attackState.errors++; addAttackLog({status:'network',ms,method:req.method,url,error:true,category:s.id,severity:s.severity}); updateAttackStats();
+  }
+}
+function ensureAttackArmed(){if(!document.getElementById('attack-armed')?.checked){alert('Activa la confirmación de ejecución controlada antes de enviar tráfico de ataque.');return false;}return true;}
+async function runSelectedAttacks(){
+  if(!ensureAttackArmed()||attackState.running)return;
+  const ids=[...document.querySelectorAll('.attack-check:checked')].map(x=>x.value); if(!ids.length){alert('Selecciona al menos un escenario.');return;}
+  await runAttackIds(ids);
+}
+async function runAttackScenario(id){if(!ensureAttackArmed()||attackState.running)return;await runAttackIds([id]);}
+async function runAttackIds(ids){
+  attackState.running=true; attackState.abort=false; attackState.started=attackState.started||Date.now();
+  const stop=document.getElementById('attack-stop'); const live=document.getElementById('attack-live'); if(stop)stop.style.display='inline-block'; if(live)live.style.display='flex';
+  const count=Math.max(1,Math.min(10,parseInt(document.getElementById('attack-count')?.value||'3',10))); const delay=Math.max(ATTACK_MIN_DELAY,parseInt(document.getElementById('attack-delay')?.value||'600',10));
+  let sentThisRun=0;
+  for(const id of ids){
+    const s=ATTACK_SCENARIOS.find(x=>x.id===id); if(!s)continue;
+    for(let i=0;i<count;i++){
+      if(attackState.abort||sentThisRun>=ATTACK_MAX_TOTAL)break;
+      const req=s.requests[i%s.requests.length]; await sendAttackRequest(s,req); sentThisRun++;
+      await new Promise(r=>setTimeout(r,delay+Math.random()*120));
+    }
+    if(attackState.abort||sentThisRun>=ATTACK_MAX_TOTAL)break;
+  }
+  attackState.running=false; if(stop)stop.style.display='none'; if(live)live.style.display='none';
+  addActivity('attack','WAF Attack Lab run completed',`${sentThisRun} probes enviados a ${ATTACK_TARGET}.`,sentThisRun?'medium':'info','WAF Attack Lab');
+}
+function stopAttacks(){attackState.abort=true;attackState.running=false;const stop=document.getElementById('attack-stop');const live=document.getElementById('attack-live');if(stop)stop.style.display='none';if(live)live.style.display='none';addActivity('attack','WAF Attack Lab stopped','Ejecución detenida por el usuario.','medium','WAF Attack Lab');}
+seedDemoState();
+
 const TITLES={dashboard:['Dashboard','Welcome back, Sara. Here\'s what\'s happening.'],
   transactions:['Transactions','All payment activity across your account.'],
   analytics:['Analytics','Volume, revenue, and fraud metrics.'],
@@ -2260,7 +2578,11 @@ const TITLES={dashboard:['Dashboard','Welcome back, Sara. Here\'s what\'s happen
   disputes:['Disputes','Track and respond to chargebacks.'],
   api:['API Reference','Explore and test the NovaPay API — real calls to demoshop.f5latam.app'],
   webhooks:['Webhooks','Manage event subscriptions.'],
-  traffic:['Traffic Generator','Genera tráfico programado hacia demoshop.f5latam.app'],
+  traffic:['Traffic Generator','Genera tráfico legítimo programado hacia demoshop.f5latam.app'],
+  attacks:['WAF Attack Lab','Genera tráfico malicioso controlado para validar detecciones de F5 Distributed Cloud WAAP/WAF'],
+  profiles:['Perfiles Locales','Usuarios, saldos, riesgo y transacciones simuladas en el navegador.'],
+  register:['Registro Local','Onboarding interactivo de usuarios para la demo productiva.'],
+  activity:['Actividad WAAP','Auditoría local de tráfico, ataques y cambios de perfiles.'],
   zap:['ZAP Security Testing','Integración OWASP ZAP · Escaneos de seguridad · Visualización WAAP/WAF'],
   users:['Team','Users and permissions.'],
   settings:['Settings','Account and integration settings.'],
@@ -2276,6 +2598,10 @@ function show(id){
   document.getElementById('page-sub').textContent=t[1];
   if(id==='api'){setTimeout(()=>{const el=document.querySelector('#p-api .api-ep');showEndpoint('tx-create',el);},10);}
   if(id==='traffic'){renderTraffic();}
+  if(id==='attacks'){renderAttacks();}
+  if(id==='profiles'){renderProfiles();}
+  if(id==='register'){renderRegister();}
+  if(id==='activity'){renderActivity();}
   if(id==='zap'){renderZap();}
 }
 
