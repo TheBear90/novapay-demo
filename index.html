@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>BIVA Bank — Financial Platform</title>
+<title>BIVA Bank — Digital Banking Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
@@ -249,9 +249,9 @@
   <!-- SIDEBAR -->
   <nav class="sidebar">
     <div class="sidebar-logo">
-      <div class="logo-mark">N</div>
+      <div class="logo-mark">B</div>
       <div>
-        <div class="logo-name">NovaPay</div>
+        <div class="logo-name">BIVA Bank</div>
         <div class="logo-badge">DEMO</div>
       </div>
     </div>
@@ -277,10 +277,10 @@
     <div class="nav-item" onclick="show('settings')"><span class="nav-icon">⚙️</span><span>Settings</span></div>
     <div class="sidebar-footer">
       <div class="user-chip">
-        <div class="avatar">SJ</div>
+        <div class="avatar">BB</div>
         <div>
-          <div class="user-name">Sara Johnson</div>
-          <div class="user-role">Admin · Acme Corp</div>
+          <div class="user-name">BIVA Bank Ops</div>
+          <div class="user-role">Admin · BIVA Bank</div>
         </div>
       </div>
     </div>
@@ -291,7 +291,7 @@
     <div class="topbar">
       <div>
         <div class="topbar-title" id="page-title">Dashboard</div>
-        <div class="topbar-sub" id="page-sub">Welcome back, Sara. Here's what's happening.</div>
+        <div class="topbar-sub" id="page-sub">Welcome back, BIVA Ops. Here's what's happening.</div>
       </div>
       <div class="topbar-right">
         <button class="tbtn tbtn-ghost" onclick="show('notifications')">🔔 Alerts <span style="background:var(--red);color:#fff;border-radius:8px;font-size:10px;padding:0 5px;margin-left:4px">4</span></button>
@@ -541,8 +541,8 @@
         </div>
         <div id="st-general">
           <div class="setting-group">
-            <div class="setting-row"><div><div class="setting-name">Company Name</div><div class="setting-desc">Displayed on invoices</div></div><input class="input-field" value="Acme Corporation"></div>
-            <div class="setting-row"><div><div class="setting-name">Support Email</div><div class="setting-desc">For customer receipts</div></div><input class="input-field" value="pay@acmecorp.io"></div>
+            <div class="setting-row"><div><div class="setting-name">Institution Name</div><div class="setting-desc">Displayed on banking statements</div></div><input class="input-field" value="BIVA Bank"></div>
+            <div class="setting-row"><div><div class="setting-name">Security Operations Email</div><div class="setting-desc">For banking notifications</div></div><input class="input-field" value="security@bivabank.local"></div>
             <div class="setting-row"><div><div class="setting-name">Default Currency</div><div class="setting-desc">USD, EUR, GBP, etc.</div></div><input class="input-field" value="USD"></div>
           </div>
           <div class="setting-group">
@@ -557,17 +557,17 @@
             <div class="setting-row"><div><div class="setting-name">IP Allowlist</div><div class="setting-desc">Restrict API access to trusted IPs</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
             <div class="setting-row"><div><div class="setting-name">Session Timeout</div><div class="setting-desc">Auto-logout after inactivity</div></div><input class="input-field" value="30 minutes"></div>
           </div>
-          <div class="alert alert-info"><div class="alert-icon">ℹ️</div><div class="alert-body"><div class="alert-title">PCI DSS Compliant</div>NovaPay is Level 1 PCI DSS certified. All cardholder data is encrypted at rest and in transit.</div></div>
+          <div class="alert alert-info"><div class="alert-icon">ℹ️</div><div class="alert-body"><div class="alert-title">PCI DSS Compliant</div>BIVA Bank is Level 1 PCI DSS certified. All cardholder data is encrypted at rest and in transit.</div></div>
         </div>
         <div id="st-keys" style="display:none">
           <div class="setting-group">
             <div class="section-label" style="padding:12px 0 4px">Live Keys</div>
-            <div class="setting-row"><div><div class="setting-name">Publishable Key</div></div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)">pk_live_4xK9mN2qR7vL3...</div></div>
+            <div class="setting-row"><div><div class="setting-name">Publishable Key</div></div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)">pk_live_biva_4xK9mN2q...</div></div>
             <div class="setting-row"><div><div class="setting-name">Secret Key</div></div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)">sk_live_••••••••••••••••••••</div></div>
           </div>
           <div class="setting-group">
             <div class="section-label" style="padding:12px 0 4px">Test Keys</div>
-            <div class="setting-row"><div><div class="setting-name">Publishable Key</div></div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)">pk_test_7yH2nM4pS9wQ1...</div></div>
+            <div class="setting-row"><div><div class="setting-name">Publishable Key</div></div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)">pk_test_biva_7yH2nM...</div></div>
             <div class="setting-row"><div><div class="setting-name">Secret Key</div></div><div style="font-family:var(--mono);font-size:11px;color:var(--text3)">sk_test_••••••••••••••••••••</div></div>
           </div>
           <button class="try-btn" style="margin-top:8px" onclick="alert('Key regenerated (demo)')">Regenerate Keys</button>
@@ -618,22 +618,22 @@
 <script>
 // ── DATA ──────────────────────────────────────────
 const TX = [
-  {id:'txn_4Kx9mN2qR7vL',merchant:'Stripe Atlas',customer:'Marcus Webb',email:'m.webb@webware.io',amount:12400,currency:'USD',method:'card',card:'••4242',status:'completed',risk:12,date:'2025-05-24 14:31',country:'US',icon:'🛒',color:'#22c97c'},
-  {id:'txn_7yH2nM4pS9wQ',merchant:'CloudOps Inc',customer:'Priya Sharma',email:'priya@cloudops.dev',amount:5850,currency:'USD',method:'bank',card:'Chase ••8812',status:'completed',risk:4,date:'2025-05-24 13:18',country:'IN',icon:'☁️',color:'#4f8ef7'},
-  {id:'txn_3rB8kL1tY6pF',merchant:'NexGen AI',customer:'Lucas Ferreira',email:'lucas.f@nexgen.ai',amount:89900,currency:'USD',method:'wire',card:'HSBC ••3391',status:'pending',risk:28,date:'2025-05-24 12:04',country:'BR',icon:'🤖',color:'#a78bfa'},
-  {id:'txn_9vQ5jD0uC4hE',merchant:'RetailChain Co.',customer:'Emma Larsson',email:'e.larsson@retail.se',amount:3210,currency:'USD',method:'card',card:'••1337',status:'completed',risk:7,date:'2025-05-24 11:50',country:'SE',icon:'🛍️',color:'#2dd4bf'},
-  {id:'txn_2wX6fA8bM0kN',merchant:'CryptoVault',customer:'Jin-woo Park',email:'jpark@cryptovault.io',amount:450000,currency:'USD',method:'crypto',card:'BTC 0x4f...',status:'flagged',risk:91,date:'2025-05-24 11:02',country:'KR',icon:'🔐',color:'#f0a930'},
-  {id:'txn_1gT4hK7nO9qZ',merchant:'SaaS World',customer:'Anya Ivanova',email:'anya@saasworld.io',amount:9900,currency:'USD',method:'card',card:'••7755',status:'failed',risk:15,date:'2025-05-24 10:30',country:'RU',icon:'💻',color:'#f25c5c'},
-  {id:'txn_5cR0lW3vI2mS',merchant:'FinTech Labs',customer:'Omar Hassan',email:'o.hassan@ftlabs.ae',amount:22500,currency:'USD',method:'bank',card:'Emirates ••5521',status:'completed',risk:19,date:'2025-05-23 18:44',country:'AE',icon:'🏦',color:'#22c97c'},
-  {id:'txn_8dN1mQ6bP4xT',merchant:'GlobalShip',customer:'Sophie Martin',email:'s.martin@gship.fr',amount:7640,currency:'EUR',method:'card',card:'••9934',status:'completed',risk:3,date:'2025-05-23 17:12',country:'FR',icon:'📦',color:'#4f8ef7'},
-  {id:'txn_6uE3kO9aL7yV',merchant:'DataBridge',customer:'Carlos Reyes',email:'c.reyes@databridge.mx',amount:15000,currency:'USD',method:'wire',card:'BBVA ••2281',status:'completed',risk:22,date:'2025-05-23 15:09',country:'MX',icon:'📡',color:'#a78bfa'},
-  {id:'txn_0sF7pI5cN8jA',merchant:'EduTech Pro',customer:'Amara Diallo',email:'amara@edupro.ng',amount:1200,currency:'USD',method:'card',card:'••6618',status:'pending',risk:8,date:'2025-05-23 14:22',country:'NG',icon:'📚',color:'#2dd4bf'},
-  {id:'txn_4bY2rU0dH3gX',merchant:'TravelEase',customer:'Yuki Tanaka',email:'yuki.t@travelease.jp',amount:480000,currency:'JPY',method:'card',card:'••4401',status:'completed',risk:6,date:'2025-05-23 09:00',country:'JP',icon:'✈️',color:'#22c97c'},
-  {id:'txn_7kZ9oV3fE1wC',merchant:'SecurePay AU',customer:'Liam O\'Brien',email:'liam@securepay.au',amount:3300,currency:'AUD',method:'bank',card:'ANZ ••7733',status:'flagged',risk:73,date:'2025-05-22 22:15',country:'AU',icon:'🔒',color:'#f0a930'},
+  {id:'txn_4Kx9mN2qR7vL',merchant:'BIVA Cards',customer:'Marcus Webb',email:'m.webb@webware.io',amount:12400,currency:'USD',method:'card',card:'••4242',status:'completed',risk:12,date:'2025-05-24 14:31',country:'US',icon:'🛒',color:'#22c97c'},
+  {id:'txn_7yH2nM4pS9wQ',merchant:'BIVA Mobile Banking',customer:'Priya Sharma',email:'priya@cloudops.dev',amount:5850,currency:'USD',method:'bank',card:'Chase ••8812',status:'completed',risk:4,date:'2025-05-24 13:18',country:'IN',icon:'☁️',color:'#4f8ef7'},
+  {id:'txn_3rB8kL1tY6pF',merchant:'BIVA Investment Desk',customer:'Lucas Ferreira',email:'lucas.f@nexgen.ai',amount:89900,currency:'USD',method:'wire',card:'HSBC ••3391',status:'pending',risk:28,date:'2025-05-24 12:04',country:'BR',icon:'🤖',color:'#a78bfa'},
+  {id:'txn_9vQ5jD0uC4hE',merchant:'BIVA Merchant Services',customer:'Emma Larsson',email:'e.larsson@retail.se',amount:3210,currency:'USD',method:'card',card:'••1337',status:'completed',risk:7,date:'2025-05-24 11:50',country:'SE',icon:'🛍️',color:'#2dd4bf'},
+  {id:'txn_2wX6fA8bM0kN',merchant:'BIVA Digital Vault',customer:'Jin-woo Park',email:'jpark@cryptovault.io',amount:450000,currency:'USD',method:'crypto',card:'BTC 0x4f...',status:'flagged',risk:91,date:'2025-05-24 11:02',country:'KR',icon:'🔐',color:'#f0a930'},
+  {id:'txn_1gT4hK7nO9qZ',merchant:'BIVA Business Portal',customer:'Anya Ivanova',email:'anya@saasworld.io',amount:9900,currency:'USD',method:'card',card:'••7755',status:'failed',risk:15,date:'2025-05-24 10:30',country:'RU',icon:'💻',color:'#f25c5c'},
+  {id:'txn_5cR0lW3vI2mS',merchant:'BIVA Open Finance',customer:'Omar Hassan',email:'o.hassan@ftlabs.ae',amount:22500,currency:'USD',method:'bank',card:'Emirates ••5521',status:'completed',risk:19,date:'2025-05-23 18:44',country:'AE',icon:'🏦',color:'#22c97c'},
+  {id:'txn_8dN1mQ6bP4xT',merchant:'BIVA Cross-Border Payments',customer:'Sophie Martin',email:'s.martin@gship.fr',amount:7640,currency:'EUR',method:'card',card:'••9934',status:'completed',risk:3,date:'2025-05-23 17:12',country:'FR',icon:'📦',color:'#4f8ef7'},
+  {id:'txn_6uE3kO9aL7yV',merchant:'BIVA Data Services',customer:'Carlos Reyes',email:'c.reyes@databridge.mx',amount:15000,currency:'USD',method:'wire',card:'BBVA ••2281',status:'completed',risk:22,date:'2025-05-23 15:09',country:'MX',icon:'📡',color:'#a78bfa'},
+  {id:'txn_0sF7pI5cN8jA',merchant:'BIVA Student Banking',customer:'Amara Diallo',email:'amara@edupro.ng',amount:1200,currency:'USD',method:'card',card:'••6618',status:'pending',risk:8,date:'2025-05-23 14:22',country:'NG',icon:'📚',color:'#2dd4bf'},
+  {id:'txn_4bY2rU0dH3gX',merchant:'BIVA Travel Benefits',customer:'Yuki Tanaka',email:'yuki.t@travelease.jp',amount:480000,currency:'JPY',method:'card',card:'••4401',status:'completed',risk:6,date:'2025-05-23 09:00',country:'JP',icon:'✈️',color:'#22c97c'},
+  {id:'txn_7kZ9oV3fE1wC',merchant:'BIVA SecurePay',customer:'Liam O\'Brien',email:'liam@securepay.au',amount:3300,currency:'AUD',method:'bank',card:'ANZ ••7733',status:'flagged',risk:73,date:'2025-05-22 22:15',country:'AU',icon:'🔒',color:'#f0a930'},
 ];
 
 const PAYOUTS = [
-  {id:'po_4Kx9mN2qR7vL',recipient:'Acme Corp Main',account:'Chase ••4412',amount:840000,status:'completed',date:'2025-05-20'},
+  {id:'po_4Kx9mN2qR7vL',recipient:'BIVA Bank Main',account:'Chase ••4412',amount:840000,status:'completed',date:'2025-05-20'},
   {id:'po_7yH2nM4pS9wQ',recipient:'EU Ops Account',account:'Deutsche ••2298',amount:124000,status:'completed',date:'2025-05-15'},
   {id:'po_3rB8kL1tY6pF',recipient:'APAC Reserve',account:'DBS ••3381',amount:56200,status:'pending',date:'2025-06-01'},
   {id:'po_9vQ5jD0uC4hE',recipient:'Contractor Pool',account:'Wells Fargo ••8812',amount:28100,status:'pending',date:'2025-06-01'},
@@ -645,17 +645,17 @@ const DISPUTES = [
   {id:'dp_3rB8kL',txn:'txn_5cR0lW3vI2mS',customer:'Omar Hassan',amount:22500,reason:'Duplicate charge',deadline:'2025-06-10',status:'reviewing'},
 ];
 const USERS = [
-  {name:'Sara Johnson',email:'sara@acmecorp.io',role:'Admin',avatar:'SJ',color:'#4f8ef7',txCount:18249,volume:4821340,joined:'Jan 12, 2024',status:'active'},
-  {name:'Dev Patel',email:'dev@acmecorp.io',role:'Developer',avatar:'DP',color:'#22c97c',txCount:0,volume:0,joined:'Mar 3, 2024',status:'active'},
-  {name:'Rachel Kim',email:'rachel@acmecorp.io',role:'Analyst',avatar:'RK',color:'#a78bfa',txCount:0,volume:0,joined:'Apr 15, 2024',status:'active'},
-  {name:'Tom Hargreaves',email:'tom@acmecorp.io',role:'Support',avatar:'TH',color:'#f0a930',txCount:0,volume:0,joined:'Feb 28, 2024',status:'inactive'},
-  {name:'Zoe Chen',email:'zoe@acmecorp.io',role:'Developer',avatar:'ZC',color:'#2dd4bf',txCount:0,volume:0,joined:'May 1, 2025',status:'active'},
-  {name:'André Silva',email:'andre@acmecorp.io',role:'Finance',avatar:'AS',color:'#f25c5c',txCount:0,volume:0,joined:'Jan 30, 2025',status:'active'},
+  {name:'BIVA Admin',email:'admin@bivabank.local',role:'Admin',avatar:'BB',color:'#4f8ef7',txCount:18249,volume:4821340,joined:'Jan 12, 2024',status:'active'},
+  {name:'Dev Patel',email:'dev@bivabank.local',role:'Developer',avatar:'DP',color:'#22c97c',txCount:0,volume:0,joined:'Mar 3, 2024',status:'active'},
+  {name:'Rachel Kim',email:'rachel@bivabank.local',role:'Analyst',avatar:'RK',color:'#a78bfa',txCount:0,volume:0,joined:'Apr 15, 2024',status:'active'},
+  {name:'Tom Hargreaves',email:'tom@bivabank.local',role:'Support',avatar:'TH',color:'#f0a930',txCount:0,volume:0,joined:'Feb 28, 2024',status:'inactive'},
+  {name:'Zoe Chen',email:'zoe@bivabank.local',role:'Developer',avatar:'ZC',color:'#2dd4bf',txCount:0,volume:0,joined:'May 1, 2025',status:'active'},
+  {name:'André Silva',email:'andre@bivabank.local',role:'Finance',avatar:'AS',color:'#f25c5c',txCount:0,volume:0,joined:'Jan 30, 2025',status:'active'},
 ];
 const NOTIFS = [
-  {icon:'⚠️',color:'rgba(240,169,48,.2)',title:'High-risk transaction flagged',msg:'txn_2wX6fA8bM0kN · Risk score 91 · CryptoVault · $450,000',time:'14 min ago',unread:true},
+  {icon:'⚠️',color:'rgba(240,169,48,.2)',title:'High-risk transaction flagged',msg:'txn_2wX6fA8bM0kN · Risk score 91 · BIVA Digital Vault · $450,000',time:'14 min ago',unread:true},
   {icon:'🔔',color:'rgba(79,142,247,.2)',title:'Payout scheduled',msg:'$56,200 to APAC Reserve — Jun 1, 2025',time:'2 hr ago',unread:true},
-  {icon:'⚡',color:'rgba(242,92,92,.2)',title:'Transaction failed',msg:'txn_1gT4hK7nO9qZ · SaaS World · $99.00 · Card declined',time:'4 hr ago',unread:true},
+  {icon:'⚡',color:'rgba(242,92,92,.2)',title:'Transaction failed',msg:'txn_1gT4hK7nO9qZ · BIVA Business Portal · $99.00 · Card declined',time:'4 hr ago',unread:true},
   {icon:'✅',color:'rgba(34,201,124,.2)',title:'Dispute resolved',msg:'dp_9aL2 · Chargeback reversed · +$1,200 recovered',time:'1 day ago',unread:false},
   {icon:'👤',color:'rgba(167,139,250,.2)',title:'New user joined',msg:'Zoe Chen accepted invite · Role: Developer',time:'2 days ago',unread:false},
   {icon:'📊',color:'rgba(45,212,191,.2)',title:'Monthly report ready',msg:'April 2025 statement is available for download',time:'3 days ago',unread:false},
@@ -787,7 +787,7 @@ function renderCountries(){
   </div>`).join('');
 }
 function renderMerchants(){
-  const M=[['NexGen AI','$89,900',91],['FinTech Labs','$22,500',62],['CloudOps Inc','$5,850',35],['EduTech Pro','$1,200',18],['RetailChain','$3,210',12]];
+  const M=[['BIVA Investment Desk','$89,900',91],['BIVA Open Finance','$22,500',62],['BIVA Mobile Banking','$5,850',35],['BIVA Student Banking','$1,200',18],['BIVA Merchant Services','$3,210',12]];
   document.getElementById('merchant-list').innerHTML=M.map(([name,v,pct])=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
     <div style="flex:1;font-size:13px;font-weight:500">${name}</div>
     <div style="font-family:var(--mono);font-size:12px;color:var(--text2)">${v}</div>
@@ -796,9 +796,9 @@ function renderMerchants(){
 }
 function renderWebhooks(){
   const endpoints=[
-    {url:'https://acmecorp.io/hooks/novapay',events:['payment.succeeded','payment.failed'],active:true},
-    {url:'https://api.acmecorp.io/webhooks',events:['payout.created','dispute.opened'],active:true},
-    {url:'https://staging.acmecorp.io/test-hook',events:['*'],active:false},
+    {url:'https://bivabank.local/hooks/biva-bank',events:['payment.succeeded','payment.failed'],active:true},
+    {url:'https://api.bivabank.local/webhooks',events:['payout.created','dispute.opened'],active:true},
+    {url:'https://staging.bivabank.local/test-hook',events:['*'],active:false},
   ];
   document.getElementById('webhook-list').innerHTML=endpoints.map(e=>`<div class="webhook-row">
     <div style="font-size:13px">🟢</div>
@@ -840,7 +840,7 @@ const ENDPOINTS={
     {name:'amount',type:'integer',req:true,desc:'Amount in smallest currency unit (e.g. cents)'},
     {name:'currency',type:'string',req:true,desc:'3-letter ISO 4217 currency code (e.g. "USD")'},
     {name:'payment_method',type:'string',req:true,desc:'Payment method ID from /v1/payment-methods'},
-    {name:'customer_id',type:'string',req:false,desc:'NovaPay customer ID to associate the transaction'},
+    {name:'customer_id',type:'string',req:false,desc:'BIVA Bank customer ID to associate the transaction'},
     {name:'description',type:'string',req:false,desc:'Human-readable description for receipt'},
     {name:'metadata',type:'object',req:false,desc:'Arbitrary key-value data attached to the transaction'},
   ],response:`{
@@ -909,7 +909,7 @@ const ENDPOINTS={
   ],response:`{
   <span class="k">"id"</span>: <span class="s">"wh_4Kx9mN2qR7vL"</span>,
   <span class="k">"object"</span>: <span class="s">"webhook"</span>,
-  <span class="k">"url"</span>: <span class="s">"https://acmecorp.io/hooks/novapay"</span>,
+  <span class="k">"url"</span>: <span class="s">"https://bivabank.local/hooks/biva-bank"</span>,
   <span class="k">"events"</span>: [<span class="s">"payment.succeeded"</span>, <span class="s">"payment.failed"</span>],
   <span class="k">"secret"</span>: <span class="s">"whsec_••••••••••••••••••••••"</span>,
   <span class="k">"active"</span>: <span class="v">true</span>,
@@ -980,7 +980,7 @@ async function tryEndpoint(btn,epId){
   } else {
     // Real GET using no-cors — SPA always responds
     try{
-      await fetch(BASE_URL+ep.path,{method:'GET',mode:'no-cors',headers:{'X-NovaPay-Demo':'true'}});
+      await fetch(BASE_URL+ep.path,{method:'GET',mode:'no-cors',headers:{'X-BIVA-Bank-Demo':'true'}});
       const ms=Math.round(performance.now()-t0);
       box.innerHTML=`<span style="color:var(--green);font-weight:700">HTTP 200 OK</span>  <span style="color:var(--text3);font-size:11px">${ms}ms · ${BASE_URL}${ep.path}</span>\n\n${ep.response}`;
     }catch(err){
@@ -998,14 +998,14 @@ function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
 // Paths confirmed to return 200 on demoshop.f5latam.app (serves the SPA on all routes)
 // API paths are simulated locally (no backend) — logged as 200 Simulated
 const TG_SCENARIOS=[
-  {id:'browse',icon:'🛍️',label:'Browse Products',desc:'Simula usuarios navegando el catálogo — requests GET a la raíz del sitio',color:'#4f8ef7',paths:['/?page=home','/?page=catalog','/?ref=menu','/?utm_source=organic','/?page=featured'],method:'GET',count:10,delay:400,sim:false},
-  {id:'search',icon:'🔍',label:'Product Search',desc:'Tráfico de búsquedas — GET al dominio con parámetros de búsqueda',color:'#a78bfa',paths:['/?q=laptop','/?q=phone','/?q=headphones','/?q=tablet','/?q=monitor','/?q=keyboard'],method:'GET',count:8,delay:500,sim:false},
-  {id:'checkout',icon:'💳',label:'Checkout Flow',desc:'Simula flujo de compra — múltiples GETs al dominio con params de sesión',color:'#22c97c',paths:['/?step=cart','/?step=checkout','/?step=payment','/?step=confirm','/?step=receipt'],method:'GET',count:5,delay:700,sim:false},
-  {id:'api_tx',icon:'⚡',label:'API: POST Transactions',desc:'Simula llamadas POST a /v1/transactions — respuesta 200 simulada localmente',color:'#f0a930',paths:['/v1/transactions'],method:'POST',count:6,delay:600,sim:true,simResp:{id:'txn_demo',status:'completed',amount:12400,currency:'usd'}},
-  {id:'api_cust',icon:'👤',label:'API: Create Customers',desc:'Simula creación de clientes via API — respuesta 200 simulada localmente',color:'#2dd4bf',paths:['/v1/customers'],method:'POST',count:4,delay:800,sim:true,simResp:{id:'cus_demo',email:'demo@example.com',status:'active'}},
-  {id:'flood',icon:'🚀',label:'High Volume Burst',desc:'Ráfaga de alto volumen — 30 GET requests al servidor real',color:'#f25c5c',paths:['/?burst=1','/?burst=2','/?burst=3','/?burst=4','/?burst=5'],method:'GET',count:30,delay:80,sim:false},
-  {id:'health',icon:'🩺',label:'Health Check Loop',desc:'Monitoreo continuo del sitio — GET repetidos a la raíz del dominio',color:'#22c97c',paths:['/?health=1','/?ping=1','/?status=check'],method:'GET',count:15,delay:300,sim:false},
-  {id:'mixed',icon:'🎲',label:'Mixed Traffic',desc:'Mezcla realista de navegación real + llamadas API simuladas',color:'#4f8ef7',paths:['/?page=home','/?q=deals','/?step=cart','/v1/transactions','/v1/customers'],method:'MIXED',count:20,delay:350,sim:'mixed'},
+  {id:'browse',icon:'🏦',label:'Browse Banking Portal',desc:'Usuarios navegando home, cuentas, tarjetas y préstamos — GET reales a la SPA.',color:'#4f8ef7',paths:['/?page=home','/?page=accounts','/?page=cards','/?page=loans','/?page=investments'],method:'GET',count:10,delay:400},
+  {id:'search',icon:'🔍',label:'Search Banking Products',desc:'Consultas legítimas al endpoint activo /api/accounts/search.',color:'#a78bfa',paths:['/api/accounts/search?product=savings&segment=retail','/api/accounts/search?product=credit-card&segment=business','/api/accounts/search?product=loan&segment=retail'],method:'GET',count:8,delay:500},
+  {id:'login',icon:'🔐',label:'API: Login Attempts',desc:'POST benignos al endpoint activo /api/auth/login.',color:'#22c97c',paths:['/api/auth/login'],method:'POST',count:6,delay:600,body:{scenario:'benign',username:'biva.demo.user',password:'demo-only'}},
+  {id:'transfer',icon:'💸',label:'API: Transfers',desc:'POST benignos al endpoint activo /api/payments/transfer.',color:'#f0a930',paths:['/api/payments/transfer'],method:'POST',count:6,delay:650,body:{scenario:'benign',amount:1250,currency:'USD',fromAccount:'001-demo',toAccount:'002-demo'}},
+  {id:'profile',icon:'👤',label:'API: Profile Updates',desc:'POST benignos al endpoint activo /api/users/profile.',color:'#2dd4bf',paths:['/api/users/profile'],method:'POST',count:4,delay:750,body:{scenario:'benign',userId:'usr_demo',channel:'web'}},
+  {id:'health',icon:'🩺',label:'Health Check Loop',desc:'Monitoreo continuo del sitio — GET reales a /api/system/health.',color:'#22c97c',paths:['/api/system/health','/?health=1','/?ping=1'],method:'GET',count:15,delay:300},
+  {id:'burst',icon:'🚀',label:'High Volume Banking Burst',desc:'Ráfaga acotada de tráfico legítimo hacia rutas SPA y APIs activas.',color:'#f25c5c',paths:['/?burst=1','/api/system/health','/api/accounts/search?product=checking','/api/reports/export?scenario=benign&format=csv'],method:'MIXED',count:24,delay:120},
+  {id:'mixed',icon:'🎲',label:'Mixed Productive Traffic',desc:'Mezcla realista de navegación y APIs bancarias activas.',color:'#4f8ef7',paths:['/?page=dashboard','/api/accounts/search?product=savings','/api/auth/login','/api/payments/transfer','/api/users/profile'],method:'MIXED',count:20,delay:350},
 ];
 let tgLogs=[];
 let tgRunning=false;
@@ -1084,36 +1084,32 @@ function addLog(entry){
 
 async function fireRequest(path,method,scenario){
   const t0=performance.now();
-  // API paths don't exist on the server — simulate them locally (200 + fake JSON)
-  const isApiPath=path.startsWith('/v1/');
-  if(isApiPath){
-    await new Promise(r=>setTimeout(r,80+Math.random()*120)); // realistic latency
-    const ms=Math.round(performance.now()-t0);
-    tgStats.total++;tgStats.ok++;
-    tgStats.latencies.push(ms);
-    if(tgStats.latencies.length>100)tgStats.latencies.shift();
-    addLog({status:200,ms,method,path,note:'sim'});
-    updateStats();
-    return;
+  const targetUrl=(window.location.hostname===new URL(BASE_URL).hostname)?path:BASE_URL+path;
+  const visibleUrl=BASE_URL+path;
+  const opts={method:method==='MIXED'?'GET':method,cache:'no-store',credentials:'omit'};
+  if(opts.method==='POST'||opts.method==='PATCH'||opts.method==='PUT'){
+    const body=scenario?.body||{scenario:'benign',source:'traffic-generator',ts:Date.now()};
+    opts.body=new URLSearchParams(body).toString();
+    opts.headers={'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'};
   }
-  // Real GET to the SPA domain — any route returns 200
+  if(window.location.hostname!==new URL(BASE_URL).hostname){
+    opts.mode='no-cors';
+  }
   try{
-    const res=await fetch(BASE_URL+path,{
-      method:'GET',
-      mode:'no-cors', // avoids CORS error; opaque response but confirms server reached
-      headers:{'X-Traffic-Source':'novapay-traffic-gen'}
-    });
+    const res=await fetch(targetUrl,opts);
     const ms=Math.round(performance.now()-t0);
-    // no-cors gives opaque response (status=0) but means server WAS reached — log as 200
-    tgStats.total++;tgStats.ok++;
+    const opaque=res.type==='opaque'||res.status===0||opts.mode==='no-cors';
+    const status=opaque?200:res.status;
+    tgStats.total++;
+    if(status>=200&&status<400)tgStats.ok++; else tgStats.err++;
     tgStats.latencies.push(ms);
     if(tgStats.latencies.length>100)tgStats.latencies.shift();
-    addLog({status:200,ms,method:'GET',path});
+    addLog({status,ms,method:opts.method,path:visibleUrl.replace(BASE_URL,''),note:opaque?'opaque':''});
     updateStats();
   }catch(err){
     const ms=Math.round(performance.now()-t0);
     tgStats.total++;tgStats.err++;
-    addLog({status:0,ms,method:'GET',path});
+    addLog({status:0,ms,method:opts.method,path:visibleUrl.replace(BASE_URL,'')});
     updateStats();
   }
 }
@@ -1172,9 +1168,9 @@ function clearLogs(){
 // LOCAL PRODUCTIVE DEMO STATE — USERS, TXS, ACTIVITY
 // Runs entirely in the browser via localStorage. No install, no backend required.
 // ═══════════════════════════════════════════════════
-const LS_USERS='novapay.demo.localUsers.v2';
-const LS_TXS='novapay.demo.localTxs.v2';
-const LS_ACTIVITY='novapay.demo.activity.v2';
+const LS_USERS='biva-bank.demo.localUsers.v2';
+const LS_TXS='biva-bank.demo.localTxs.v2';
+const LS_ACTIVITY='biva-bank.demo.activity.v2';
 
 const DEMO_NAMES=[
   ['Martina Ríos','martina.rios@demo.local','AR'],['Federico Sosa','federico.sosa@demo.local','UY'],
@@ -1182,7 +1178,7 @@ const DEMO_NAMES=[
   ['Valentina Costa','valentina.costa@demo.local','CL'],['Bruno Méndez','bruno.mendez@demo.local','MX'],
   ['Sofía Álvarez','sofia.alvarez@demo.local','AR'],['Nicolás Vera','nicolas.vera@demo.local','UY']
 ];
-const DEMO_MERCHANTS=['DemoShop Electronics','NovaPay Market','F5 Demo Store','Secure Checkout LATAM','Cloud Native Shop','WAAP Retail'];
+const DEMO_MERCHANTS=['BIVA Retail Banking','BIVA Bank Marketplace','BIVA Secure Banking Demo','BIVA Secure Checkout','BIVA Digital Banking','BIVA WAAP Banking'];
 const DEMO_ACTIONS=[
   {type:'login',icon:'🔐',title:'User login',desc:'Inicio de sesión exitoso desde navegador demo'},
   {type:'profile',icon:'✏️',title:'Profile update',desc:'Actualización de dirección y preferencias'},
@@ -1207,7 +1203,7 @@ function seedDemoState(){
     writeJson(LS_TXS,txs.slice(0,18));
   }
   if(!localStorage.getItem(LS_ACTIVITY)){
-    writeJson(LS_ACTIVITY,[{time:nowStr(),type:'system',severity:'info',title:'Demo state initialized',desc:'Usuarios, transacciones y actividad local preparados para la demo.',source:'NovaPay'}]);
+    writeJson(LS_ACTIVITY,[{time:nowStr(),type:'system',severity:'info',title:'Demo state initialized',desc:'Usuarios, transacciones y actividad local preparados para la demo.',source:'BIVA Bank'}]);
   }
 }
 function getUsers(){seedDemoState();return readJson(LS_USERS,[]);}
@@ -1215,7 +1211,7 @@ function saveUsers(u){writeJson(LS_USERS,u);}
 function getLocalTxs(){seedDemoState();return readJson(LS_TXS,[]);}
 function saveLocalTxs(t){writeJson(LS_TXS,t.slice(0,80));}
 function getActivity(){seedDemoState();return readJson(LS_ACTIVITY,[]);}
-function addActivity(type,title,desc,severity='info',source='NovaPay'){
+function addActivity(type,title,desc,severity='info',source='BIVA Bank'){
   const a=getActivity();
   a.unshift({time:nowStr(),type,severity,title,desc,source});
   writeJson(LS_ACTIVITY,a.slice(0,160));
@@ -1242,7 +1238,7 @@ function createTxForUser(userId){
   const users=getUsers(); const u=users.find(x=>x.id===userId)||users[0]; if(!u)return;
   const tx=makeLocalTx(u); const txs=getLocalTxs(); txs.unshift(tx); saveLocalTxs(txs);
   u.txs=(u.txs||0)+1; u.balance=Math.max(0,(u.balance||0)-Math.round(tx.amount/100)); saveUsers(users);
-  addActivity('transaction','Transaction generated',`${tx.id} · ${tx.customer} · ${fmt(tx.amount)} · riesgo ${tx.risk}`, tx.risk>70?'high':tx.risk>45?'medium':'low','NovaPay API');
+  addActivity('transaction','Transaction generated',`${tx.id} · ${tx.customer} · ${fmt(tx.amount)} · riesgo ${tx.risk}`, tx.risk>70?'high':tx.risk>45?'medium':'low','BIVA Bank API');
   renderProfiles();
 }
 function modifyUserRisk(userId){
@@ -1299,7 +1295,7 @@ function renderRegister(){
       <div class="card">
         <div class="card-header"><div><div class="card-title">Local Customer Registration</div><div class="card-sub">Crea usuarios únicamente en el navegador para simular onboarding productivo.</div></div></div>
         <div class="modal-field"><label class="modal-label">Full name</label><input id="reg-name" class="modal-input" value="Demo Customer ${Math.floor(1000+Math.random()*8999)}"></div>
-        <div class="modal-field"><label class="modal-label">Email</label><input id="reg-email" class="modal-input" value="demo.customer${Math.floor(1000+Math.random()*8999)}@demoshop.local"></div>
+        <div class="modal-field"><label class="modal-label">Email</label><input id="reg-email" class="modal-input" value="biva.customer${Math.floor(1000+Math.random()*8999)}@bivabank.local"></div>
         <div class="modal-field"><label class="modal-label">Country</label><select id="reg-country" class="modal-input"><option>AR</option><option>UY</option><option>PY</option><option>CL</option><option>MX</option></select></div>
         <div class="modal-field"><label class="modal-label">Initial risk score</label><input id="reg-risk" class="modal-input" type="number" min="0" max="99" value="12"></div>
         <div class="modal-footer" style="justify-content:flex-start"><button class="tbtn tbtn-primary" onclick="createUserFromRegister()">Create Local User</button><button class="tbtn tbtn-ghost" onclick="renderRegister()">Randomize</button></div>
@@ -1349,94 +1345,78 @@ function renderActivity(){
 const ATTACK_TARGET=BASE_URL;
 const ATTACK_MAX_TOTAL=30;
 const ATTACK_MIN_DELAY=250;
-let attackState={running:false,abort:false,total:0,sent:0,blocked:0,allowed:0,errors:0,latencies:[],logs:[],started:null};
-
-// Active Vercel endpoints handled by /api/[...path].js. Each request reaches a real serverless
-// function unless F5 Distributed Cloud WAAP blocks it first.
-const ACTIVE_WAF_ENDPOINTS=[
-  '/api/system/health',
-  '/api/products/search',
-  '/api/auth/login',
-  '/api/cart/checkout',
-  '/api/users/profile',
-  '/api/files/download',
-  '/api/reports/export',
-  '/api/webhooks/register',
-  '/api/admin/lookup',
-  '/api/recon/probe',
-  '/api/support/ticket'
-];
-
+let attackState={running:false,abort:false,total:0,sent:0,blocked:0,errors:0,latencies:[],logs:[],started:null};
 const ATTACK_SCENARIOS=[
-  {id:'sqli',icon:'💉',label:'SQL Injection',severity:'high',expected:'WAAP WAF: SQL Injection / Attack Type Injection',desc:'Ataques SQLi contra endpoints reales de búsqueda, login y admin lookup.',requests:[
-    {method:'GET',endpoint:'/api/products/search',path:'/api/products/search?scenario=sqli&q=%27%20OR%20%271%27%3D%271%27--&category=electronics',transport:'query'},
-    {method:'GET',endpoint:'/api/admin/lookup',path:'/api/admin/lookup?scenario=sqli&account=105%20UNION%20SELECT%20card_number%2Ccvv%20FROM%20cards',transport:'query'},
-    {method:'POST',endpoint:'/api/auth/login',path:'/api/auth/login',transport:'form',body:{scenario:'sqli',username:"admin' OR '1'='1'--",password:'demo-only',operation:'login'}}]},
-  {id:'xss',icon:'🧬',label:'Cross-Site Scripting',severity:'high',expected:'WAAP WAF: Cross-Site Scripting / Script Injection',desc:'Payloads XSS reflejados contra búsqueda, perfil y tickets de soporte.',requests:[
-    {method:'GET',endpoint:'/api/products/search',path:'/api/products/search?scenario=xss&q=%3Cscript%3Ealert%28%27f5-demo%27%29%3C%2Fscript%3E',transport:'query'},
-    {method:'GET',endpoint:'/api/support/ticket',path:'/api/support/ticket?scenario=xss&message=%3Cimg%20src%3Dx%20onerror%3Dalert%281%29%3E',transport:'query'},
-    {method:'POST',endpoint:'/api/users/profile',path:'/api/users/profile',transport:'form',body:{scenario:'xss',display_name:'Demo User',bio:'<svg/onload=alert("f5-demo")>'}}]},
-  {id:'traversal',icon:'📁',label:'Path Traversal / LFI',severity:'high',expected:'WAAP WAF: Directory Traversal / Local File Inclusion',desc:'Intentos controlados de descarga de archivos sobre endpoint activo de files.',requests:[
-    {method:'GET',endpoint:'/api/files/download',path:'/api/files/download?scenario=traversal&file=..%2F..%2F..%2F..%2Fetc%2Fpasswd',transport:'query'},
-    {method:'GET',endpoint:'/api/reports/export',path:'/api/reports/export?scenario=traversal&template=..%255c..%255cwindows%255cwin.ini',transport:'query'},
-    {method:'POST',endpoint:'/api/files/download',path:'/api/files/download',transport:'form',body:{scenario:'traversal',file:'../../../../etc/shadow',safeDemo:'true'}}]},
-  {id:'cmdi',icon:'🖥️',label:'Command Injection',severity:'high',expected:'WAAP WAF: OS Command Injection',desc:'Secuencias de shell como parámetros de reporte/exportación. No se ejecutan en backend.',requests:[
-    {method:'GET',endpoint:'/api/reports/export',path:'/api/reports/export?scenario=cmdi&report=monthly%3Bcat%20%2Fetc%2Fpasswd',transport:'query'},
-    {method:'GET',endpoint:'/api/system/health',path:'/api/system/health?scenario=cmdi&host=127.0.0.1%20%26%26%20id',transport:'query'},
-    {method:'POST',endpoint:'/api/reports/export',path:'/api/reports/export',transport:'form',body:{scenario:'cmdi',format:'pdf; whoami',safeDemo:'true'}}]},
-  {id:'ssrf',icon:'🌐',label:'SSRF / Metadata Probe',severity:'medium',expected:'WAAP WAF: SSRF / Metadata Service Probe',desc:'URLs internas y metadata endpoints enviados a webhooks/register sin conexión saliente real.',requests:[
-    {method:'GET',endpoint:'/api/webhooks/register',path:'/api/webhooks/register?scenario=ssrf&callback=http%3A%2F%2F169.254.169.254%2Flatest%2Fmeta-data%2F',transport:'query'},
-    {method:'GET',endpoint:'/api/webhooks/register',path:'/api/webhooks/register?scenario=ssrf&url=http%3A%2F%2Flocalhost%3A8080%2Fadmin',transport:'query'},
-    {method:'POST',endpoint:'/api/webhooks/register',path:'/api/webhooks/register',transport:'form',body:{scenario:'ssrf',webhook_url:'http://127.0.0.1:8000/internal',safeDemo:'true'}}]},
-  {id:'scanner',icon:'🕵️',label:'Recon / Sensitive Path',severity:'medium',expected:'WAAP/Bot: Scanner / Sensitive File Access',desc:'Reconocimiento contra endpoint activo que recibe rutas sensibles como parámetro.',requests:[
-    {method:'GET',endpoint:'/api/recon/probe',path:'/api/recon/probe?scenario=recon&path=%2F.env',transport:'query'},
-    {method:'GET',endpoint:'/api/recon/probe',path:'/api/recon/probe?scenario=recon&path=%2F.git%2Fconfig',transport:'query'},
-    {method:'GET',endpoint:'/api/recon/probe',path:'/api/recon/probe?scenario=recon&path=%2Fwp-login.php',transport:'query'}]},
-  {id:'api_abuse',icon:'🔌',label:'API Abuse / Schema Drift',severity:'medium',expected:'API Protection: schema violation / sensitive field / abnormal parameter',desc:'Requests a endpoints activos con campos inesperados, valores negativos y datos sensibles demo.',requests:[
-    {method:'POST',endpoint:'/api/cart/checkout',path:'/api/cart/checkout',transport:'json',body:{scenario:'api_abuse',amount:-999999,role:'admin',debug:true,credit_card:'4111111111111111'}},
-    {method:'POST',endpoint:'/api/users/profile',path:'/api/users/profile',transport:'json',body:{scenario:'api_abuse',operation:'mass_update',isAdmin:true,limit:999999}},
-    {method:'POST',endpoint:'/api/cart/checkout',path:'/api/cart/checkout',transport:'json',body:{scenario:'api_abuse',customer:{email:'demo@f5.local',ssn:'000-00-0000'},metadata:{unexpected:'field'}}}]}
+  {id:'sqli',icon:'💉',label:'SQL Injection',severity:'high',expected:'F5 XC WAAP: SQL Injection / Attack Type Injection',desc:'Payloads contra APIs reales de búsqueda, admin lookup y login.',requests:[
+    {method:'GET',path:'/api/accounts/search?scenario=sqli&q=%27%20OR%20%271%27%3D%271%27--&product=accounts',payload:"' OR '1'='1'--"},
+    {method:'GET',path:'/api/admin/lookup?scenario=sqli&customerId=105%20UNION%20SELECT%20card_number%2Ccvv%20FROM%20cards',payload:'UNION SELECT demo'},
+    {method:'POST',path:'/api/auth/login',body:{scenario:'sqli',username:"admin' OR '1'='1'--",password:'demo-only',operation:'login'}}]},
+  {id:'xss',icon:'🧬',label:'Cross-Site Scripting',severity:'high',expected:'F5 XC WAAP: XSS / Script Tag / Event Handler',desc:'Pruebas reflejadas no persistentes en búsqueda, soporte y perfil.',requests:[
+    {method:'GET',path:'/api/accounts/search?scenario=xss&q=%3Cscript%3Ealert%28%27biva-demo%27%29%3C%2Fscript%3E',payload:'script-tag-demo'},
+    {method:'POST',path:'/api/support/ticket',body:{scenario:'xss',subject:'card issue',comment:'<img src=x onerror=alert(1)>'}},
+    {method:'POST',path:'/api/users/profile',body:{scenario:'xss',displayName:'<svg/onload=alert("biva-demo")>',userId:'usr_demo'}}]},
+  {id:'traversal',icon:'📁',label:'Path Traversal / LFI',severity:'high',expected:'F5 XC WAAP: Directory Traversal / Local File Inclusion',desc:'Intentos controlados de acceso a archivos vía statements y reportes.',requests:[
+    {method:'GET',path:'/api/statements/download?scenario=traversal&file=..%2F..%2F..%2F..%2Fetc%2Fpasswd&account=001-demo',payload:'../../../../etc/passwd'},
+    {method:'GET',path:'/api/reports/export?scenario=traversal&template=..%255c..%255cwindows%255cwin.ini',payload:'encoded traversal'},
+    {method:'POST',path:'/api/statements/download',body:{scenario:'traversal',download:'../../../../etc/shadow',safeDemo:true}}]},
+  {id:'cmdi',icon:'🖥️',label:'Command Injection',severity:'high',expected:'F5 XC WAAP: OS Command Injection',desc:'Secuencias de shell enviadas como datos inertes a endpoints activos.',requests:[
+    {method:'GET',path:'/api/reports/export?scenario=cmdi&format=pdf%3Bcat%20%2Fetc%2Fpasswd&report=monthly',payload:';cat /etc/passwd'},
+    {method:'GET',path:'/api/system/health?scenario=cmdi&host=127.0.0.1%20%26%26%20id',payload:'&& id'},
+    {method:'POST',path:'/api/reports/export',body:{scenario:'cmdi',export:'pdf; whoami',safeDemo:true}}]},
+  {id:'ssrf',icon:'🌐',label:'SSRF / Metadata Probe',severity:'medium',expected:'F5 XC WAAP: SSRF / Metadata Service Access',desc:'Callbacks internos simulados sobre el endpoint real de webhooks.',requests:[
+    {method:'GET',path:'/api/webhooks/register?scenario=ssrf&callback=http%3A%2F%2F169.254.169.254%2Flatest%2Fmeta-data%2F',payload:'metadata URL'},
+    {method:'GET',path:'/api/webhooks/register?scenario=ssrf&url=http%3A%2F%2Flocalhost%3A8080%2Fadmin',payload:'localhost URL'},
+    {method:'POST',path:'/api/webhooks/register',body:{scenario:'ssrf',webhook_url:'http://127.0.0.1:8000/internal',safeDemo:true}}]},
+  {id:'scanner',icon:'🕵️',label:'Recon / Sensitive Path',severity:'medium',expected:'F5 XC WAAP/Bot: Scanner / Sensitive File Access',desc:'Accesos típicos de scanner enviados a un endpoint activo de recon.',requests:[
+    {method:'GET',path:'/api/recon/probe?scenario=recon&target_path=%2F.env',payload:'/.env'},
+    {method:'GET',path:'/api/recon/probe?scenario=recon&target_path=%2F.git%2Fconfig',payload:'/.git/config'},
+    {method:'GET',path:'/api/recon/probe?scenario=recon&target_path=%2Fwp-login.php',payload:'/wp-login.php'}]},
+  {id:'api_abuse',icon:'🔌',label:'API Abuse / Schema Drift',severity:'medium',expected:'F5 XC API Security: Schema Violation / Sensitive Field',desc:'Campos inesperados y valores anómalos contra APIs bancarias activas.',requests:[
+    {method:'POST',path:'/api/payments/transfer',body:{scenario:'api_abuse',amount:-999999,role:'admin',debug:true,credit_card:'4111111111111111'}},
+    {method:'POST',path:'/api/users/profile',body:{scenario:'api_abuse',operation:'mass_update',isAdmin:true,limit:999999}},
+    {method:'POST',path:'/api/admin/lookup',body:{scenario:'api_abuse',customer:{email:'demo@bivabank.local',ssn:'000-00-0000'},metadata:{unexpected:'field'}}}]}
 ];
-
 function attackBadge(sev){return sev==='high'?'badge-red':sev==='medium'?'badge-amber':'badge-blue';}
-function isOnAttackTarget(){try{return window.location.hostname===new URL(ATTACK_TARGET).hostname;}catch(_){return false;}}
-function attackUrl(path){return isOnAttackTarget()?path:ATTACK_TARGET+path;}
+function isOnAttackTarget(){
+  try{return window.location.hostname===new URL(ATTACK_TARGET).hostname;}catch(_){return false;}
+}
+function attackUrl(path){
+  // When the app is published as https://demoshop.f5latam.app, use relative URLs.
+  // This avoids CORS/preflight and lets F5 XC WAAP inspect the real request directly.
+  return isOnAttackTarget()?path:ATTACK_TARGET+path;
+}
 function displayAttackUrl(path){return ATTACK_TARGET+path;}
-function resetAttackState(){attackState={running:false,abort:false,total:0,sent:0,blocked:0,allowed:0,errors:0,latencies:[],logs:[],started:null};updateAttackStats();const log=document.getElementById('attack-log');if(log)log.innerHTML='';}
+function resetAttackState(){attackState={running:false,abort:false,total:0,sent:0,blocked:0,errors:0,latencies:[],logs:[],started:null};updateAttackStats();const log=document.getElementById('attack-log');if(log)log.innerHTML='';}
 function renderAttacks(){
   const panel=document.getElementById('p-attacks'); if(!panel)return;
   panel.innerHTML=`
     <div class="alert alert-warn" style="margin-bottom:16px">
-      <div class="alert-icon">🛡️</div><div class="alert-body"><div class="alert-title">WAF Attack Lab controlado contra APIs reales</div>
-      Este módulo envía firmas conocidas de ataque únicamente a <strong>${ATTACK_TARGET}</strong>. Los requests apuntan a endpoints serverless activos de la app, no a rutas simuladas. Si F5 Distributed Cloud WAAP bloquea, el backend no responde y el log mostrará 403/406/429 cuando el navegador pueda leer el status.</div>
+      <div class="alert-icon">🛡️</div><div class="alert-body"><div class="alert-title">WAF Attack Lab controlado</div>
+      Este módulo envía firmas conocidas de ataque únicamente a endpoints activos de BIVA Bank bajo <strong>${ATTACK_TARGET}</strong>. Está limitado a ${ATTACK_MAX_TOTAL} requests por ejecución, con delay mínimo de ${ATTACK_MIN_DELAY}ms, sin fuzzing infinito, sin payloads destructivos y sin targets editables.</div>
     </div>
     <div class="metrics" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px">
-      <div class="metric-card"><div class="metric-label">Locked Target</div><div class="metric-val" style="font-size:13px;font-family:var(--mono)">${ATTACK_TARGET}</div><div class="metric-delta" style="color:var(--text3)">same domain flow</div></div>
+      <div class="metric-card"><div class="metric-label">Locked Target</div><div class="metric-val" style="font-size:13px;font-family:var(--mono)">${ATTACK_TARGET}</div><div class="metric-delta" style="color:var(--text3)">BIVA Bank domain flow</div></div>
       <div class="metric-card"><div class="metric-label">Sent</div><div class="metric-val" id="attack-sent">0</div><div class="metric-delta delta-up" id="attack-total">0 total</div></div>
-      <div class="metric-card"><div class="metric-label">Blocked / WAF</div><div class="metric-val" id="attack-blocked">0</div><div class="metric-delta" style="color:var(--text3)">403 / 406 / 429</div></div>
+      <div class="metric-card"><div class="metric-label">Blocked / 403</div><div class="metric-val" id="attack-blocked">0</div><div class="metric-delta" style="color:var(--text3)">visible when WAAP blocks</div></div>
       <div class="metric-card"><div class="metric-label">Avg Latency</div><div class="metric-val" id="attack-lat">—</div><div class="metric-delta" id="attack-rps" style="color:var(--text3)">0 req/s</div></div>
     </div>
     <div class="card" style="margin-bottom:16px">
       <div style="display:flex;align-items:end;gap:14px;flex-wrap:wrap">
-        <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);min-width:290px"><input id="attack-armed" type="checkbox" style="accent-color:var(--accent)"> Confirmo ejecución controlada contra demoshop.f5latam.app</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);min-width:250px"><input id="attack-armed" type="checkbox" style="accent-color:var(--accent)"> Confirmo ejecución controlada contra BIVA Bank en demoshop.f5latam.app</label>
         <div><label class="modal-label">Requests per scenario</label><input id="attack-count" class="input-field" type="number" min="1" max="10" value="3" style="width:90px"></div>
         <div><label class="modal-label">Delay ms</label><input id="attack-delay" class="input-field" type="number" min="${ATTACK_MIN_DELAY}" max="5000" value="600" style="width:100px"></div>
         <div style="margin-left:auto;display:flex;gap:8px"><button class="tbtn tbtn-primary" onclick="runSelectedAttacks()">▶ Run Selected</button><button class="tbtn tbtn-ghost" onclick="runConnectivityCheck()">Test Active APIs</button><button id="attack-stop" class="tbtn" style="display:none;background:var(--red);color:#fff;border:none" onclick="stopAttacks()">⏹ Stop</button><button class="tbtn tbtn-ghost" onclick="resetAttackState()">Clear</button></div>
-      </div>
-      <div style="font-size:11px;color:var(--text3);margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
-        Endpoints activos: <span style="font-family:var(--mono);color:var(--accent)">${ACTIVE_WAF_ENDPOINTS.join('</span>, <span style="font-family:var(--mono);color:var(--accent)">')}</span>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px" id="attack-scenarios">
       ${ATTACK_SCENARIOS.map(s=>`<label style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;display:block">
         <div style="display:flex;align-items:flex-start;gap:10px"><input class="attack-check" type="checkbox" value="${s.id}" checked style="accent-color:var(--accent);margin-top:4px"><div style="flex:1"><div style="font-size:18px;margin-bottom:4px">${s.icon}</div><div style="font-weight:600;font-size:13px">${s.label}</div><div style="font-size:11px;color:var(--text3);line-height:1.5;margin:6px 0 10px">${s.desc}</div><span class="badge ${attackBadge(s.severity)}" style="font-size:10px">${s.severity}</span> <span class="badge badge-purple" style="font-size:10px">${s.requests.length} probes</span></div></div>
         <div style="font-size:10px;color:var(--text3);margin-top:10px;border-top:1px solid var(--border);padding-top:8px">Expected: ${s.expected}</div>
-        <div style="font-size:10px;color:var(--accent);margin-top:6px;font-family:var(--mono)">${s.requests.map(r=>r.endpoint).filter((v,i,a)=>a.indexOf(v)===i).join(' · ')}</div>
         <button class="filter-btn" style="margin-top:10px" onclick="event.preventDefault();event.stopPropagation();runAttackScenario('${s.id}')">Run only this</button>
       </label>`).join('')}
     </div>
-    <div class="table-wrap" style="max-height:410px;overflow-y:auto">
-      <div class="table-header-row" style="padding:10px 16px"><div><div class="card-title" style="font-size:12px">Live Attack Request Log</div><div class="card-sub">Los probes son requests reales a endpoints activos. 200 = llegó al backend demo. 403/406/429 = bloqueo o challenge del WAF/WAAP. Si ejecutás desde un preview distinto al dominio final, el browser puede usar no-cors y el status real se valida en F5 XC.</div></div><div id="attack-live" style="display:none;align-items:center;gap:6px;font-size:11px;color:var(--red)"><span style="width:6px;height:6px;border-radius:50%;background:var(--red);display:inline-block;animation:pulse 1s infinite"></span> SENDING</div></div>
+    <div class="table-wrap" style="max-height:390px;overflow-y:auto">
+      <div class="table-header-row" style="padding:10px 16px"><div><div class="card-title" style="font-size:12px">Live Attack Request Log</div><div class="card-sub">La respuesta 403/406 indica bloqueo real de WAAP. Si la app corre fuera de demoshop.f5latam.app, se usa no-cors para evitar preflight: el request se envía, pero el status real debe validarse en F5 XC.</div></div><div id="attack-live" style="display:none;align-items:center;gap:6px;font-size:11px;color:var(--red)"><span style="width:6px;height:6px;border-radius:50%;background:var(--red);display:inline-block;animation:pulse 1s infinite"></span> SENDING</div></div>
       <div id="attack-log" style="font-family:var(--mono);font-size:11px"></div>
     </div>`;
   updateAttackStats();
@@ -1451,59 +1431,74 @@ function addAttackLog(row){
   attackState.logs.unshift(row); if(attackState.logs.length>160)attackState.logs.pop();
   const log=document.getElementById('attack-log'); if(!log)return;
   const c=row.blocked?'var(--red)':row.error?'var(--amber)':'var(--green)';
-  const badge=row.blocked?'BLOCKED':row.error?'ERROR':row.status===200?'REACHED':'SENT';
+  const badge=row.blocked?'BLOCKED':row.error?'ERROR':'SENT';
   const div=document.createElement('div'); div.style.cssText='display:flex;align-items:center;gap:10px;padding:7px 16px;border-bottom:1px solid var(--border)';
-  div.innerHTML=`<span style="color:${c};font-weight:700;min-width:64px">${badge}</span><span style="color:var(--text3);min-width:64px">${row.status}</span><span style="color:var(--text3);min-width:56px">${row.ms}ms</span><span style="color:var(--amber);min-width:42px">${row.method}</span><span class="badge ${attackBadge(row.severity)}" style="font-size:9px;min-width:64px;justify-content:center">${row.category}</span><span style="color:var(--purple);min-width:120px;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(row.endpoint||'')}</span><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(row.url)}">${escHtml(row.url)}</span><span style="font-size:10px;color:var(--text3)">${new Date().toLocaleTimeString()}</span>`;
+  div.innerHTML=`<span style="color:${c};font-weight:700;min-width:54px">${badge}</span><span style="color:var(--text3);min-width:48px">${row.status}</span><span style="color:var(--text3);min-width:56px">${row.ms}ms</span><span style="color:var(--amber);min-width:42px">${row.method}</span><span class="badge ${attackBadge(row.severity)}" style="font-size:9px;min-width:54px;justify-content:center">${row.category}</span><span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(row.url)}">${escHtml(row.url)}</span><span style="font-size:10px;color:var(--text3)">${new Date().toLocaleTimeString()}</span>`;
   log.insertBefore(div,log.firstChild); if(log.children.length>120)log.removeChild(log.lastChild);
-}
-function buildAttackFetchOptions(s,req,sameOrigin){
-  const opts={method:req.method,cache:'no-store',credentials:'omit'};
-  if(req.body){
-    const payload={...req.body,scenario:req.body.scenario||s.id,endpoint:req.endpoint,waap_demo:true};
-    if(req.transport==='json' && sameOrigin){
-      opts.headers={'Content-Type':'application/json'};
-      opts.body=JSON.stringify(payload);
-    } else {
-      const form=new URLSearchParams();
-      Object.entries(payload).forEach(([k,v])=>form.append(k,typeof v==='object'?JSON.stringify(v):String(v)));
-      opts.headers={'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'};
-      opts.body=form.toString();
-    }
-  }
-  if(!sameOrigin)opts.mode='no-cors';
-  return opts;
 }
 async function sendAttackRequest(s,req){
   const t0=performance.now();
   const url=attackUrl(req.path);
   const visibleUrl=displayAttackUrl(req.path);
   const sameOrigin=isOnAttackTarget();
-  const opts=buildAttackFetchOptions(s,req,sameOrigin);
+
+  // IMPORTANT: do not add custom headers here.
+  // Custom headers or application/json from a different origin trigger CORS preflight (OPTIONS).
+  // In many WAAP demos the preflight succeeds/fails before the malicious GET/POST is sent,
+  // so F5 XC only sees OPTIONS instead of the real attack request.
+  const opts={method:req.method,cache:'no-store',credentials:'omit'};
+
+  if(req.body){
+    const bodyWithScenario={...req.body,scenario:req.body.scenario||s.id,transport:'text/plain-preflight-free'};
+    opts.body=JSON.stringify(bodyWithScenario);
+    opts.headers={'Content-Type':'text/plain;charset=UTF-8'}; // simple request, no browser preflight
+  }
+
+  if(!sameOrigin){
+    // Cross-origin execution from a Vercel preview/local host: force a simple opaque request.
+    // The browser cannot read the response, but the request is still emitted to demoshop.f5latam.app
+    // and therefore can be inspected in F5 Distributed Cloud security events.
+    opts.mode='no-cors';
+  }
+
   try{
     const res=await fetch(url,opts);
     const ms=Math.round(performance.now()-t0);
     const opaque=!sameOrigin || res.type==='opaque' || res.status===0;
     const status=opaque?'sent/no-cors':res.status;
-    const blocked=!opaque && [401,403,406,418,429].includes(res.status);
-    const allowed=!opaque && res.status>=200 && res.status<300;
-    attackState.total++; attackState.sent++; if(blocked)attackState.blocked++; if(allowed)attackState.allowed++;
-    attackState.latencies.push(ms); if(attackState.latencies.length>100)attackState.latencies.shift();
-    addAttackLog({status,ms,method:req.method,url:visibleUrl,endpoint:req.endpoint,blocked,opaque,category:s.id,severity:s.severity});
+    const blocked=!opaque && [401,403,406,429].includes(res.status);
+    attackState.total++;
+    attackState.sent++;
+    if(blocked)attackState.blocked++;
+    attackState.latencies.push(ms);
+    if(attackState.latencies.length>100)attackState.latencies.shift();
+    addAttackLog({status,ms,method:req.method,url:visibleUrl,blocked,opaque,category:s.id,severity:s.severity});
     updateAttackStats();
-    addActivity('attack',`${s.label} probe sent`,`${req.method} ${req.endpoint} · ${req.transport||'query'} · expected ${s.expected}${opaque?' · status visible only in F5 XC because request used no-cors':''}`,s.severity==='high'?'high':'medium','WAF Attack Lab');
+    addActivity('attack',`${s.label} probe sent`,`${req.method} ${req.path} · expected ${s.expected}${opaque?' · status visible only in F5 XC because request used no-cors':''}`,s.severity==='high'?'high':'medium','WAF Attack Lab');
   }catch(e){
     const ms=Math.round(performance.now()-t0);
-    attackState.total++; attackState.errors++;
-    addAttackLog({status:'network/cors',ms,method:req.method,url:visibleUrl,endpoint:req.endpoint,error:true,category:s.id,severity:s.severity});
+    attackState.total++;
+    attackState.errors++;
+    addAttackLog({status:'network/cors',ms,method:req.method,url:visibleUrl,error:true,category:s.id,severity:s.severity});
     updateAttackStats();
   }
 }
+
 async function runConnectivityCheck(){
   if(attackState.running)return;
-  const s={id:'health',label:'Connectivity Check',severity:'low',expected:'Allowed requests to active APIs'};
-  const checks=ACTIVE_WAF_ENDPOINTS.slice(0,6).map(p=>({method:'GET',endpoint:p,path:p+'?scenario=benign&check=connectivity&_ts='+Date.now(),transport:'query'}));
-  for(const req of checks){await sendAttackRequest(s,req); await new Promise(r=>setTimeout(r,120));}
+  const s={id:'health',label:'Active API Check',severity:'low',expected:'Allowed request to BIVA Bank active APIs'};
+  const checks=[
+    {method:'GET',path:'/api/system/health?scenario=benign&check=health&_ts='+Date.now()},
+    {method:'GET',path:'/api/accounts/search?scenario=benign&product=savings&_ts='+Date.now()},
+    {method:'POST',path:'/api/auth/login',body:{scenario:'benign',username:'biva.demo.user',password:'demo-only'}},
+    {method:'POST',path:'/api/payments/transfer',body:{scenario:'benign',amount:1250,currency:'USD',fromAccount:'001-demo',toAccount:'002-demo'}}
+  ];
+  for(const req of checks){
+    await sendAttackRequest(s,req);
+    await new Promise(r=>setTimeout(r,180));
+  }
 }
+
 function ensureAttackArmed(){if(!document.getElementById('attack-armed')?.checked){alert('Activa la confirmación de ejecución controlada antes de enviar tráfico de ataque.');return false;}return true;}
 async function runSelectedAttacks(){
   if(!ensureAttackArmed()||attackState.running)return;
@@ -1526,20 +1521,20 @@ async function runAttackIds(ids){
     if(attackState.abort||sentThisRun>=ATTACK_MAX_TOTAL)break;
   }
   attackState.running=false; if(stop)stop.style.display='none'; if(live)live.style.display='none';
-  addActivity('attack','WAF Attack Lab run completed',`${sentThisRun} probes enviados a endpoints activos bajo ${ATTACK_TARGET}.`,sentThisRun?'medium':'info','WAF Attack Lab');
+  addActivity('attack','WAF Attack Lab run completed',`${sentThisRun} probes enviados a ${ATTACK_TARGET}.`,sentThisRun?'medium':'info','WAF Attack Lab');
 }
 function stopAttacks(){attackState.abort=true;attackState.running=false;const stop=document.getElementById('attack-stop');const live=document.getElementById('attack-live');if(stop)stop.style.display='none';if(live)live.style.display='none';addActivity('attack','WAF Attack Lab stopped','Ejecución detenida por el usuario.','medium','WAF Attack Lab');}
 seedDemoState();
 
-const TITLES={dashboard:['Dashboard','Welcome back, Sara. Here\'s what\'s happening.'],
+const TITLES={dashboard:['Dashboard','Welcome back, BIVA Ops. Here\'s what\'s happening.'],
   transactions:['Transactions','All payment activity across your account.'],
   analytics:['Analytics','Volume, revenue, and fraud metrics.'],
   payouts:['Payouts','Manage disbursements to your bank accounts.'],
   disputes:['Disputes','Track and respond to chargebacks.'],
-  api:['API Reference','Explore and test the NovaPay API — real calls to demoshop.f5latam.app'],
+  api:['API Reference','Explore and test the BIVA Bank API — real calls to demoshop.f5latam.app'],
   webhooks:['Webhooks','Manage event subscriptions.'],
-  traffic:['Traffic Generator','Genera tráfico legítimo programado hacia demoshop.f5latam.app'],
-  attacks:['WAF Attack Lab','Genera tráfico malicioso controlado para validar detecciones de F5 Distributed Cloud WAAP/WAF'],
+  traffic:['Traffic Generator','Genera tráfico legítimo programado hacia APIs activas de BIVA Bank en demoshop.f5latam.app'],
+  attacks:['WAF Attack Lab','Genera tráfico malicioso controlado contra endpoints activos de BIVA Bank para validar F5 Distributed Cloud WAAP/WAF'],
   profiles:['Perfiles Locales','Usuarios, saldos, riesgo y transacciones simuladas en el navegador.'],
   register:['Registro Local','Onboarding interactivo de usuarios para la demo productiva.'],
   activity:['Actividad WAAP','Auditoría local de tráfico, ataques y cambios de perfiles.'],
@@ -1617,7 +1612,7 @@ function openModal(type,txId){
   } else if(type==='user'){
     box.innerHTML=`
       <div class="modal-title">Invite Team Member</div>
-      <div class="modal-sub">Send an invitation to join your NovaPay workspace</div>
+      <div class="modal-sub">Send an invitation to join the BIVA Bank demo workspace</div>
       <div class="modal-field"><label class="modal-label">Email Address</label><input class="modal-input" placeholder="colleague@company.com"></div>
       <div class="modal-field"><label class="modal-label">Role</label><select class="modal-input" style="cursor:pointer"><option>Admin</option><option>Developer</option><option>Analyst</option><option>Support</option><option>Finance</option></select></div>
       <div class="modal-footer"><button class="tbtn tbtn-ghost" onclick="closeModal()">Cancel</button><button class="tbtn tbtn-primary" onclick="alert('Invitation sent (demo)');closeModal()">Send Invite</button></div>`;
