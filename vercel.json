@@ -8,7 +8,7 @@
       "source": "/api/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "no-store, max-age=0" },
-        { "key": "X-F5-Demo-App", "value": "novapay-real-api-waap-lab" }
+        { "key": "X-F5-Demo-App", "value": "biva-bank-real-api-waap-lab" }
       ]
     }
   ]
