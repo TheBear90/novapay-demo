@@ -1,4 +1,4 @@
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
   const startedAt = Date.now();
 
   res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -12,7 +12,8 @@ module.exports = (req, res) => {
   }
 
   const query = req.query || {};
-  const body = normalizeBody(req.body);
+  const rawBody = req.body !== undefined ? req.body : await readRawBody(req);
+  const body = normalizeBody(rawBody);
   const scenario = String(
     query.scenario ||
     body.scenario ||
@@ -29,6 +30,7 @@ module.exports = (req, res) => {
     note: 'Demo endpoint only. Payloads are reflected as metadata and are never executed against any backend system.',
     method: req.method,
     url: req.url,
+    contentType: req.headers['content-type'] || null,
     scenario,
     expectedWaapDetection: classification.expectedWaapDetection,
     severity: classification.severity,
@@ -41,6 +43,16 @@ module.exports = (req, res) => {
 
   return res.status(200).json(response);
 };
+
+
+function readRawBody(req) {
+  return new Promise((resolve) => {
+    let data = '';
+    req.on('data', chunk => { data += chunk; if (data.length > 2048) req.destroy(); });
+    req.on('end', () => resolve(data));
+    req.on('error', () => resolve(''));
+  });
+}
 
 function normalizeBody(body) {
   if (!body) return {};
