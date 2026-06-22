@@ -182,7 +182,7 @@ Características relevantes:
 - Componentes visuales reutilizados mediante clases CSS.
 - Diseño responsive básico para pantallas menores a 900px.
 
-## Posibles mejoras futuras
+## Mejoras futuras
 
 Algunas mejoras sugeridas para evolucionar el proyecto:
 
@@ -197,7 +197,7 @@ Algunas mejoras sugeridas para evolucionar el proyecto:
 - Agregar pipeline CI/CD para despliegue automático.
 - Conectar la aplicación con APIs reales de pagos o eventos.
 
-## Roadmap sugerido
+## Roadmap Cambios
 
 ### Fase 1 — Organización del frontend
 
